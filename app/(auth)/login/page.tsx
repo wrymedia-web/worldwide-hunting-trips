@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -20,8 +20,9 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setLoading(true)
 
-    startTransition(async () => {
+    try {
       const supabase = createClient()
       const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
@@ -30,7 +31,6 @@ export default function LoginPage() {
         return
       }
 
-      // Determine role and redirect
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
@@ -43,7 +43,11 @@ export default function LoginPage() {
         router.push('/dashboard/hunter')
       }
       router.refresh()
-    })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -111,9 +115,9 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full gap-2" disabled={isPending}>
-              {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isPending ? 'Signing in...' : 'Sign In'}
+            <Button type="submit" className="w-full gap-2" disabled={loading}>
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { MapPin, Eye, EyeOff, Crosshair, Mountain, Loader2 } from 'lucide-react'
@@ -13,7 +13,7 @@ type AccountType = 'hunter' | 'outfitter'
 
 export default function SignupPage() {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [loading, setLoading] = useState(false)
   const [accountType, setAccountType] = useState<AccountType>('hunter')
   const [formData, setFormData] = useState({
     fullName: '',
@@ -38,44 +38,31 @@ export default function SignupPage() {
       return
     }
 
-    startTransition(async () => {
+    setLoading(true)
+    try {
       const supabase = createClient()
 
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-            role: accountType,
-          },
-        },
+        options: { data: { full_name: formData.fullName, role: accountType } },
       })
 
-      if (signUpError) {
-        setError(signUpError.message)
-        return
-      }
+      if (signUpError) { setError(signUpError.message); return }
 
       const user = data.user
-      if (!user) {
-        setError('Signup failed. Please try again.')
-        return
-      }
+      if (!user) { setError('Signup failed. Please try again.'); return }
 
-      // Create profile row
       const { error: profileError } = await createProfile(user.id, accountType, formData.email)
-      if (profileError) {
-        setError(profileError)
-        return
-      }
+      if (profileError) { setError(profileError); return }
 
-      if (accountType === 'outfitter') {
-        router.push('/dashboard/outfitter/setup')
-      } else {
-        router.push('/dashboard/hunter')
-      }
-    })
+      router.push(accountType === 'outfitter' ? '/dashboard/outfitter/setup' : '/dashboard/hunter')
+      router.refresh()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -206,10 +193,10 @@ export default function SignupPage() {
               type="submit"
               variant={accountType === 'outfitter' ? 'copper' : 'default'}
               className="w-full gap-2"
-              disabled={isPending}
+              disabled={loading}
             >
-              {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isPending
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {loading
                 ? 'Creating account...'
                 : `Create ${accountType === 'outfitter' ? 'Outfitter' : 'Hunter'} Account`}
             </Button>
