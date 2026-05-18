@@ -1,13 +1,13 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function createProfile(
   userId: string,
   role: 'hunter' | 'outfitter',
   email: string
 ): Promise<{ error: string | null }> {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { error } = await supabase.from('profiles').upsert(
     {
