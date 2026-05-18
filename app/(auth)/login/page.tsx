@@ -1,57 +1,69 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { MapPin, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
 
-    try {
-      // Supabase auth would go here
-      // const { error } = await createClient().auth.signInWithPassword({ email, password })
-      // For now, simulate a response
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      // Redirect would happen here
-      setError('Supabase not configured — add credentials to .env.local to enable auth.')
-    } catch {
-      setError('An unexpected error occurred. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+    startTransition(async () => {
+      const supabase = createClient()
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+
+      if (signInError) {
+        setError(signInError.message)
+        return
+      }
+
+      // Determine role and redirect
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single()
+
+      if (profile?.role === 'outfitter') {
+        router.push('/dashboard/outfitter')
+      } else {
+        router.push('/dashboard/hunter')
+      }
+      router.refresh()
+    })
   }
 
   return (
     <div className="min-h-screen bg-wht-paper flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <div className="bg-wht-forest p-2 rounded-lg">
-              <MapPin className="h-6 w-6 text-wht-blaze" />
-            </div>
-            <span className="font-extrabold text-wht-forest text-lg tracking-tight uppercase">
-              Worldwide Hunting Trips
-            </span>
+          <Link href="/" className="inline-block">
+            <Image
+              src="/logos/logo-stacked-ink.svg"
+              alt="Worldwide Hunting Trips"
+              width={160}
+              height={80}
+              className="mx-auto"
+            />
           </Link>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-wht-bone-2 p-8">
           <h1 className="text-2xl font-bold text-wht-forest mb-1 text-center">Welcome back</h1>
-          <p className="text-gray-500 text-sm text-center mb-6">
-            Sign in to your account
-          </p>
+          <p className="text-gray-500 text-sm text-center mb-6">Sign in to your account</p>
 
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4 text-sm text-red-700">
@@ -82,12 +94,12 @@ export default function LoginPage() {
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
+                  placeholder="Your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  autoComplete="current-password"
                   className="pr-10"
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
@@ -99,13 +111,9 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button
-              type="submit"
-              variant="default"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
+            <Button type="submit" className="w-full gap-2" disabled={isPending}>
+              {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isPending ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
 
@@ -116,13 +124,6 @@ export default function LoginPage() {
             </Link>
           </div>
         </div>
-
-        <p className="text-center text-xs text-gray-400 mt-6">
-          By signing in you agree to our{' '}
-          <Link href="/terms" className="hover:underline">Terms of Service</Link>{' '}
-          and{' '}
-          <Link href="/privacy" className="hover:underline">Privacy Policy</Link>.
-        </p>
       </div>
     </div>
   )
