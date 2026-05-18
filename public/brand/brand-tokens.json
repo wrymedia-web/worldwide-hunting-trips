@@ -1,0 +1,75 @@
+{
+  "color": {
+    "primary": {
+      "ink": {
+        "value": "#0F0E0B"
+      },
+      "bone": {
+        "value": "#F1ECDE"
+      },
+      "paper": {
+        "value": "#FAF6EB"
+      },
+      "blaze": {
+        "value": "#E85A1E"
+      }
+    },
+    "supporting": {
+      "ink-2": {
+        "value": "#1B1916"
+      },
+      "bone-2": {
+        "value": "#E7E0CC"
+      },
+      "blaze-2": {
+        "value": "#C7461A"
+      },
+      "forest": {
+        "value": "#2A332B"
+      },
+      "brass": {
+        "value": "#B08740"
+      },
+      "stone": {
+        "value": "#6B655A"
+      },
+      "fog": {
+        "value": "#A39B8C"
+      }
+    }
+  },
+  "font": {
+    "display": {
+      "value": "'Anton', 'Arial Narrow', 'Impact', sans-serif"
+    },
+    "heritage": {
+      "value": "'Zilla Slab', Georgia, serif"
+    },
+    "body": {
+      "value": "'Manrope', system-ui, sans-serif"
+    },
+    "mono": {
+      "value": "'JetBrains Mono', ui-monospace, monospace"
+    }
+  },
+  "fontSize": {
+    "display-xl": {
+      "value": "96px"
+    },
+    "display-l": {
+      "value": "64px"
+    },
+    "title": {
+      "value": "32px"
+    },
+    "lead": {
+      "value": "20px"
+    },
+    "body": {
+      "value": "16px"
+    },
+    "caption": {
+      "value": "11px"
+    }
+  }
+}

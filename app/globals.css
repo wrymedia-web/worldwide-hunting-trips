@@ -1,0 +1,215 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Zilla+Slab:wght@400;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* WHT Brand Colors */
+  --color-wht-ink: #0F0E0B;
+  --color-wht-ink-2: #1B1916;
+  --color-wht-bone: #F1ECDE;
+  --color-wht-bone-2: #E7E0CC;
+  --color-wht-paper: #FAF6EB;
+  --color-wht-blaze: #E85A1E;
+  --color-wht-blaze-2: #C7461A;
+  --color-wht-forest: #2A332B;
+  --color-wht-brass: #B08740;
+  --color-wht-stone: #6B655A;
+  --color-wht-fog: #A39B8C;
+
+  /* WHT Font Families */
+  --font-display: 'Anton', 'Arial Narrow', 'Impact', sans-serif;
+  --font-heritage: 'Zilla Slab', 'Georgia', serif;
+  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Legacy brand colors for compatibility */
+  --color-forest: #1B3A2D;
+  --color-forest-dark: #142d22;
+  --color-forest-light: #4A6B58;
+  --color-copper: #C07A3A;
+  --color-copper-dark: #a06530;
+  --color-charcoal: #1C1C1C;
+  --color-warm-tan: #E8D5B0;
+  --color-off-white: #F5F0E8;
+  --color-sage: #4A6B58;
+}
+
+:root {
+  /* WHT Brand CSS custom properties */
+  --wht-ink: #0F0E0B;
+  --wht-ink-2: #1B1916;
+  --wht-bone: #F1ECDE;
+  --wht-bone-2: #E7E0CC;
+  --wht-paper: #FAF6EB;
+  --wht-blaze: #E85A1E;
+  --wht-blaze-2: #C7461A;
+  --wht-forest: #2A332B;
+  --wht-brass: #B08740;
+  --wht-stone: #6B655A;
+  --wht-fog: #A39B8C;
+
+  --background: #FAF6EB;
+  --foreground: #0F0E0B;
+  --card: #ffffff;
+  --card-foreground: #0F0E0B;
+  --popover: #ffffff;
+  --popover-foreground: #0F0E0B;
+  --primary: #2A332B;
+  --primary-foreground: #F1ECDE;
+  --secondary: #E7E0CC;
+  --secondary-foreground: #0F0E0B;
+  --muted: #E7E0CC;
+  --muted-foreground: #6B655A;
+  --accent: #E85A1E;
+  --accent-foreground: #ffffff;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #E7E0CC;
+  --input: #E7E0CC;
+  --ring: #2A332B;
+  --chart-1: #2A332B;
+  --chart-2: #E85A1E;
+  --chart-3: #B08740;
+  --chart-4: #F1ECDE;
+  --chart-5: #0F0E0B;
+  --radius: 0.5rem;
+  --sidebar: #2A332B;
+  --sidebar-foreground: #F1ECDE;
+  --sidebar-primary: #E85A1E;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1B1916;
+  --sidebar-accent-foreground: #F1ECDE;
+  --sidebar-border: #1B1916;
+  --sidebar-ring: #6B655A;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    font-family: 'Manrope', system-ui, sans-serif;
+    background: #FAF6EB;
+    color: #0F0E0B;
+  }
+}
+
+@layer utilities {
+  /* WHT Brand utility classes */
+  .bg-wht-ink { background-color: #0F0E0B; }
+  .bg-wht-ink-2 { background-color: #1B1916; }
+  .bg-wht-bone { background-color: #F1ECDE; }
+  .bg-wht-bone-2 { background-color: #E7E0CC; }
+  .bg-wht-paper { background-color: #FAF6EB; }
+  .bg-wht-blaze { background-color: #E85A1E; }
+  .bg-wht-blaze-2 { background-color: #C7461A; }
+  .bg-wht-forest { background-color: #2A332B; }
+  .bg-wht-brass { background-color: #B08740; }
+  .bg-wht-stone { background-color: #6B655A; }
+  .bg-wht-fog { background-color: #A39B8C; }
+
+  .text-wht-ink { color: #0F0E0B; }
+  .text-wht-ink-2 { color: #1B1916; }
+  .text-wht-bone { color: #F1ECDE; }
+  .text-wht-bone-2 { color: #E7E0CC; }
+  .text-wht-paper { color: #FAF6EB; }
+  .text-wht-blaze { color: #E85A1E; }
+  .text-wht-blaze-2 { color: #C7461A; }
+  .text-wht-forest { color: #2A332B; }
+  .text-wht-brass { color: #B08740; }
+  .text-wht-stone { color: #6B655A; }
+  .text-wht-fog { color: #A39B8C; }
+
+  .border-wht-ink { border-color: #0F0E0B; }
+  .border-wht-ink-2 { border-color: #1B1916; }
+  .border-wht-bone { border-color: #F1ECDE; }
+  .border-wht-bone-2 { border-color: #E7E0CC; }
+  .border-wht-blaze { border-color: #E85A1E; }
+  .border-wht-forest { border-color: #2A332B; }
+  .border-wht-brass { border-color: #B08740; }
+
+  .hover\:bg-wht-blaze-2:hover { background-color: #C7461A; }
+  .hover\:bg-wht-forest:hover { background-color: #2A332B; }
+  .hover\:bg-wht-ink:hover { background-color: #0F0E0B; }
+  .hover\:bg-wht-bone:hover { background-color: #F1ECDE; }
+  .hover\:bg-wht-bone-2:hover { background-color: #E7E0CC; }
+  .hover\:border-wht-blaze:hover { border-color: #E85A1E; }
+  .hover\:text-wht-bone:hover { color: #F1ECDE; }
+  .hover\:text-wht-ink:hover { color: #0F0E0B; }
+  .hover\:text-wht-blaze:hover { color: #E85A1E; }
+
+  .font-display { font-family: 'Anton', 'Arial Narrow', 'Impact', sans-serif; }
+  .font-heritage { font-family: 'Zilla Slab', 'Georgia', serif; }
+  .font-body { font-family: 'Manrope', system-ui, sans-serif; }
+  .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  /* Legacy utility classes for compatibility */
+  .bg-forest { background-color: #1B3A2D; }
+  .bg-forest-dark { background-color: #142d22; }
+  .bg-forest-light { background-color: #4A6B58; }
+  .bg-copper { background-color: #C07A3A; }
+  .bg-copper-dark { background-color: #a06530; }
+  .bg-charcoal { background-color: #1C1C1C; }
+  .bg-warm-tan { background-color: #E8D5B0; }
+  .bg-off-white { background-color: #F5F0E8; }
+  .bg-sage { background-color: #4A6B58; }
+
+  .text-forest { color: #1B3A2D; }
+  .text-copper { color: #C07A3A; }
+  .text-charcoal { color: #1C1C1C; }
+  .text-warm-tan { color: #E8D5B0; }
+  .text-off-white { color: #F5F0E8; }
+  .text-sage { color: #4A6B58; }
+
+  .border-forest { border-color: #1B3A2D; }
+  .border-copper { border-color: #C07A3A; }
+  .border-warm-tan { border-color: #E8D5B0; }
+
+  .hover\:bg-forest-dark:hover { background-color: #142d22; }
+  .hover\:bg-copper-dark:hover { background-color: #a06530; }
+  .hover\:text-copper:hover { color: #C07A3A; }
+}

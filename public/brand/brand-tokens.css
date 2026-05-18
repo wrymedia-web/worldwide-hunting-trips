@@ -1,0 +1,34 @@
+/* Worldwide Hunting Trips — Brand Tokens v1.0
+ * Drop into any stylesheet root and use as CSS custom properties.
+ */
+:root {
+  /* ── Primary palette ──────────────────────────────────── */
+  --wht-ink:    #0F0E0B;   /* warm black */
+  --wht-bone:   #F1ECDE;   /* warm cream */
+  --wht-paper:  #FAF6EB;   /* app surface */
+  --wht-blaze:  #E85A1E;   /* accent orange */
+
+  /* ── Supporting palette ───────────────────────────────── */
+  --wht-ink-2:  #1B1916;
+  --wht-bone-2: #E7E0CC;
+  --wht-blaze-2:#C7461A;
+  --wht-forest: #2A332B;
+  --wht-brass:  #B08740;
+  --wht-stone:  #6B655A;
+  --wht-fog:    #A39B8C;
+  --wht-rule:   rgba(15, 14, 11, 0.18);
+
+  /* ── Type stacks ──────────────────────────────────────── */
+  --wht-font-display:  'Anton', 'Arial Narrow', 'Impact', sans-serif;
+  --wht-font-heritage: 'Zilla Slab', Georgia, serif;
+  --wht-font-body:     'Manrope', system-ui, -apple-system, sans-serif;
+  --wht-font-mono:     'JetBrains Mono', ui-monospace, 'Consolas', monospace;
+
+  /* ── Type scale ───────────────────────────────────────── */
+  --wht-text-display-xl: 96px;
+  --wht-text-display-l:  64px;
+  --wht-text-title:      32px;
+  --wht-text-lead:       20px;
+  --wht-text-body:       16px;
+  --wht-text-caption:    11px;
+}

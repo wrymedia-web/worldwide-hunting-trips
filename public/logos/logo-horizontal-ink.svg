@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" width="900" height="320">
+<defs></defs>
+  
+  <g transform="translate(30 90) scale(1.1)">
+    <path d="M 0 118 L 38 76 L 60 96 L 88 60 L 108 84 L 128 50 L 152 80 L 178 56 L 202 86 L 240 118 Z" fill="#0F0E0B" opacity="0.32"></path>
+    <path d="M 12 122 L 50 86 L 70 108 L 102 64 L 122 92 L 140 70 L 158 96 L 180 78 L 210 110 L 232 122 Z" fill="#0F0E0B"></path>
+    <circle cx="128" cy="50" r="6" fill="#E85A1E"></circle>
+    <rect x="0" y="126" width="92" height="3" fill="#0F0E0B"></rect>
+    <rect x="148" y="126" width="92" height="3" fill="#0F0E0B"></rect>
+  </g>
+  <text class="wht-anton" x="340" y="140" font-size="76" letter-spacing="3" fill="#0F0E0B">WORLDWIDE</text>
+  <text class="wht-anton" x="340" y="210" font-size="76" letter-spacing="3" fill="#0F0E0B">HUNTING TRIPS</text>
+  <line x1="340" y1="235" x2="800" y2="235" stroke="#0F0E0B" stroke-width="1" opacity="0.3"></line>
+  <text class="wht-mono" x="340" y="258" font-size="13" letter-spacing="2.5" fill="#0F0E0B" opacity="0.6">CONNECTING OUTFITTERS WITH HUNTERS · FREE</text>
+
+</svg>

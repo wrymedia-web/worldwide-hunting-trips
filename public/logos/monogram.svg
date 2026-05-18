@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+<defs></defs>
+  <rect width="400" height="400" fill="#0F0E0B"></rect>
+  <text class="wht-anton" x="200" y="240" font-size="200" letter-spacing="4" text-anchor="middle" fill="#F1ECDE">WHT</text>
+  <text class="wht-mono" x="200" y="320" font-size="14" letter-spacing="4" text-anchor="middle" fill="#F1ECDE" opacity="0.6">WORLDWIDE HUNTING TRIPS</text>
+  <circle cx="350" cy="50" r="6" fill="#E85A1E"></circle>
+
+</svg>
