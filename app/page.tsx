@@ -1,11 +1,59 @@
 import Link from 'next/link'
-import { ArrowRight, CheckCircle, MessageSquare, DollarSign, Search, Star } from 'lucide-react'
+import { ArrowRight, CheckCircle, MessageSquare, DollarSign, Search, Star, Tag, Wrench, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HuntCard } from '@/components/hunt-card'
 import { SearchBar } from '@/components/search-bar'
 import { mockHunts } from '@/lib/mock-data'
 
 const featuredHunts = mockHunts.slice(0, 6)
+
+const dealHunts = [
+  {
+    id: 'last-minute-whitetail-kansas',
+    title: 'Last-Minute Whitetail — Nov 28–Dec 2',
+    outfitterName: 'Flint Hills Trophy Co.',
+    species: 'Whitetail Deer',
+    state: 'Kansas',
+    pricePerPerson: 1100,
+    rating: 4.8,
+    reviewCount: 22,
+    weaponTypes: ['Rifle', 'Bow'],
+    lodgingIncluded: true,
+    guideType: 'fully_guided' as const,
+    badge: 'Last-Minute Deal',
+    originalPrice: 1800,
+  },
+  {
+    id: 'cancellation-elk-colorado',
+    title: 'Cancellation Opening — Rifle Elk',
+    outfitterName: 'Rockies Wilderness Outfitters',
+    species: 'Elk',
+    state: 'Colorado',
+    pricePerPerson: 3200,
+    rating: 4.9,
+    reviewCount: 41,
+    weaponTypes: ['Rifle'],
+    lodgingIncluded: true,
+    guideType: 'fully_guided' as const,
+    badge: 'Cancellation',
+    originalPrice: 4500,
+  },
+  {
+    id: 'show-special-turkey-missouri',
+    title: 'Spring Turkey — Show Special Price',
+    outfitterName: 'Ozark Ridge Outfitters',
+    species: 'Turkey',
+    state: 'Missouri',
+    pricePerPerson: 595,
+    rating: 4.7,
+    reviewCount: 18,
+    weaponTypes: ['Bow', 'Shotgun'],
+    lodgingIncluded: false,
+    guideType: 'fully_guided' as const,
+    badge: 'Show Special',
+    originalPrice: 850,
+  },
+]
 
 const featuredSpecies = [
   { name: 'Whitetail Deer', emoji: '🦌', slug: 'whitetail-deer', count: 482 },
@@ -143,6 +191,133 @@ export default function HomePage() {
           <div className="text-center mt-8 sm:hidden">
             <Link href="/browse">
               <Button variant="outline">View All Hunts</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Deals & Specials */}
+      <section className="py-16 bg-wht-forest">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Tag className="h-5 w-5 text-wht-blaze" />
+                <span className="text-xs font-mono text-wht-blaze uppercase tracking-widest">Limited Availability</span>
+              </div>
+              <h2 className="text-3xl font-heritage text-white tracking-tight">Deals &amp; Specials</h2>
+              <p className="text-wht-bone mt-1 font-body text-sm">Cancellations, last-minute openings, and show specials — updated as they become available.</p>
+            </div>
+            <Link href="/browse?deals=true" className="hidden sm:flex items-center gap-1 text-wht-blaze font-semibold hover:underline text-sm">
+              View all deals <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {dealHunts.map((deal) => (
+              <div key={deal.id} className="bg-white rounded-xl overflow-hidden shadow-sm border-2 border-wht-blaze/30 hover:border-wht-blaze hover:shadow-md transition-all group">
+                <div className="relative aspect-[4/3] bg-gradient-to-br from-wht-ink to-wht-forest overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-30 text-7xl">🎯</div>
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <span className="bg-wht-blaze text-white text-xs font-mono font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
+                      {deal.badge}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold text-wht-ink text-sm leading-tight mb-1 group-hover:text-wht-forest transition-colors">{deal.title}</h3>
+                  <p className="text-xs text-wht-stone font-mono mb-3">{deal.outfitterName} · {deal.state}</p>
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-xl font-display text-wht-blaze">${deal.pricePerPerson.toLocaleString()}</span>
+                        <span className="text-sm text-wht-stone line-through font-mono">${deal.originalPrice.toLocaleString()}</span>
+                      </div>
+                      <span className="text-xs text-wht-stone">per person</span>
+                    </div>
+                    <Link href={`/hunt/${deal.id}`}>
+                      <Button variant="default" size="sm">View Deal</Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-6 sm:hidden">
+            <Link href="/browse?deals=true">
+              <Button variant="outline-bone">View All Deals</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Hunt Customizer Promo */}
+      <section className="py-16 bg-wht-ink">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="flex-shrink-0">
+              <div className="w-20 h-20 rounded-2xl bg-wht-blaze/20 border border-wht-blaze/40 flex items-center justify-center">
+                <Wrench className="h-10 w-10 text-wht-blaze" />
+              </div>
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 bg-wht-blaze/20 border border-wht-blaze/40 rounded-full px-3 py-1 mb-3">
+                <span className="text-wht-bone text-xs font-mono font-semibold uppercase tracking-wide">New Feature</span>
+              </div>
+              <h2 className="text-3xl font-heritage text-white tracking-tight mb-3">Know Exactly What You Want?</h2>
+              <p className="text-wht-bone text-base leading-relaxed mb-6 font-body">
+                Use the <span className="text-wht-blaze font-semibold">Hunt Customizer</span> to describe your ideal hunt — species, location, style, days, group size — and we&apos;ll send it directly to outfitters who match. They respond with a custom quote built around your trip.
+              </p>
+              <Link href="/hunt-customizer">
+                <Button variant="default" size="lg" className="gap-2">
+                  Build Your Custom Hunt <ArrowRight className="h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Find My Hunt */}
+      <section className="py-16 bg-wht-paper">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-heritage text-wht-ink tracking-tight">Why Find My Hunt?</h2>
+            <p className="text-wht-stone mt-2 font-body max-w-2xl mx-auto">Built by a hunter and outfitter who got tired of the same problems on both sides.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            {[
+              {
+                icon: <DollarSign className="h-7 w-7 text-wht-blaze" />,
+                title: 'No Commissions. One Flat Fee.',
+                body: 'Outfitters pay one low annual fee — less than the commission on a single booking. That savings gets reinvested into your experience, not a broker\'s pocket.',
+              },
+              {
+                icon: <MessageSquare className="h-7 w-7 text-wht-blaze" />,
+                title: 'No Middlemen.',
+                body: 'Every listing includes a detailed Q&A section so you get the information you need upfront. Contact outfitters directly — no agents filtering your questions.',
+              },
+              {
+                icon: <ShieldCheck className="h-7 w-7 text-wht-blaze" />,
+                title: 'Built for Transparency.',
+                body: 'As both a hunter and an outfitter, we designed this platform to show you exactly what a hunt includes, what it costs, and who is running it. No surprises.',
+              },
+            ].map((item, i) => (
+              <div key={i} className="bg-white rounded-xl p-6 border border-wht-bone-2 shadow-sm">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-wht-paper border-2 border-wht-bone-2 mb-4">
+                  {item.icon}
+                </div>
+                <h3 className="text-lg font-heritage text-wht-ink mb-2">{item.title}</h3>
+                <p className="text-sm text-wht-stone leading-relaxed font-body">{item.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center">
+            <Link href="/about">
+              <Button variant="outline" size="lg" className="gap-2">
+                Our Story <ArrowRight className="h-4 w-4" />
+              </Button>
             </Link>
           </div>
         </div>

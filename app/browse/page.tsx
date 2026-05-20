@@ -21,14 +21,10 @@ const STATES = [
   'Texas', 'Utah', 'Wyoming',
 ]
 
-const WEAPON_TYPES = ['Rifle', 'Bow', 'Muzzleloader', 'Shotgun', 'Crossbow']
-
-const PRICE_RANGES = [
-  { label: 'Under $1,000', value: 'under-1k' },
-  { label: '$1,000 – $3,000', value: '1k-3k' },
-  { label: '$3,000 – $5,000', value: '3k-5k' },
-  { label: '$5,000+', value: '5k-plus' },
-]
+const WEAPON_TYPES = ['Rifle', 'Muzzleloader', 'Bow', 'Crossbow', 'Shotgun']
+const HUNTING_STYLES = ['Spot & Stalk', 'Blind', 'Tree Stand', 'Driven', 'Hounds']
+const DIFFICULTY_OPTIONS = ['Easy', 'Moderate', 'Hard']
+const GUIDE_OPTIONS = ['Fully Guided', 'Semi-Guided', 'Self-Guided']
 
 const SORT_OPTIONS = [
   { label: 'Featured', value: 'featured' },
@@ -38,32 +34,101 @@ const SORT_OPTIONS = [
   { label: 'Newest', value: 'newest' },
 ]
 
+type Filters = {
+  species: string
+  state: string
+  weapons: string[]
+  maxPrice: string
+  daysMin: string
+  daysMax: string
+  styles: string[]
+  difficulty: string[]
+  guideType: string[]
+  lodging: boolean
+  meals: boolean
+  baited: boolean
+  fenced: boolean
+  guaranteedTags: boolean
+  nonHunting: boolean
+  propertySizeMin: string
+  propertySizeMax: string
+}
+
+const defaultFilters: Filters = {
+  species: '',
+  state: '',
+  weapons: [],
+  maxPrice: '',
+  daysMin: '',
+  daysMax: '',
+  styles: [],
+  difficulty: [],
+  guideType: [],
+  lodging: false,
+  meals: false,
+  baited: false,
+  fenced: false,
+  guaranteedTags: false,
+  nonHunting: false,
+  propertySizeMin: '',
+  propertySizeMax: '',
+}
+
+function toggleArr(arr: string[], val: string): string[] {
+  return arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]
+}
+
+function FilterCheckboxGroup({ label, options, selected, onChange }: {
+  label: string
+  options: string[]
+  selected: string[]
+  onChange: (val: string[]) => void
+}) {
+  return (
+    <div>
+      <label className="text-xs font-mono text-wht-stone uppercase tracking-wider mb-2 block">{label}</label>
+      <div className="space-y-2">
+        {options.map((o) => (
+          <label key={o} className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={selected.includes(o)}
+              onChange={() => onChange(toggleArr(selected, o))}
+              className="rounded border-wht-bone-2 text-wht-ink focus:ring-wht-forest"
+            />
+            <span className="text-sm text-wht-ink font-body">{o}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function YesNoFilter({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label className="flex items-center gap-2 cursor-pointer">
+      <input
+        type="checkbox"
+        checked={value}
+        onChange={(e) => onChange(e.target.checked)}
+        className="rounded border-wht-bone-2 text-wht-ink focus:ring-wht-forest"
+      />
+      <span className="text-sm font-medium text-wht-ink font-body">{label}</span>
+    </label>
+  )
+}
+
 export default function BrowsePage() {
-  const [filters, setFilters] = useState<{
-    species: string
-    state: string
-    weapon: string
-    price: string
-    lodging: boolean
-    guideType: string
-  }>({
-    species: '',
-    state: '',
-    weapon: '',
-    price: '',
-    lodging: false,
-    guideType: '',
-  })
+  const [filters, setFilters] = useState<Filters>(defaultFilters)
   const [sort, setSort] = useState('featured')
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  const activeFilters = Object.entries(filters)
-    .filter(([, v]) => Boolean(v))
-    .map(([k, v]) => ({ key: k, value: String(v) }))
-
-  const removeFilter = (key: string) => {
-    setFilters((prev) => ({ ...prev, [key]: key === 'lodging' ? false : '' }))
-  }
+  const activeFilterCount = [
+    filters.species, filters.state, filters.maxPrice, filters.daysMin, filters.daysMax,
+    filters.propertySizeMin, filters.propertySizeMax,
+  ].filter(Boolean).length
+  + filters.weapons.length + filters.styles.length + filters.difficulty.length + filters.guideType.length
+  + [filters.lodging, filters.meals, filters.baited, filters.fenced, filters.guaranteedTags, filters.nonHunting].filter(Boolean).length
 
   return (
     <div className="min-h-screen bg-wht-paper">
@@ -85,7 +150,7 @@ export default function BrowsePage() {
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
             <SlidersHorizontal className="h-4 w-4" />
-            Filters {activeFilters.length > 0 && `(${activeFilters.length})`}
+            Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
           </button>
           <div className="w-48">
             <Select value={sort} onChange={(e) => setSort(e.target.value)}>
@@ -97,22 +162,17 @@ export default function BrowsePage() {
         </div>
 
         {/* Active filter pills */}
-        {activeFilters.length > 0 && (
+        {activeFilterCount > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
-            {activeFilters.map((f) => (
-              <button
-                key={f.key}
-                onClick={() => removeFilter(f.key)}
-                className="inline-flex items-center gap-1 bg-wht-ink text-wht-bone rounded-full px-3 py-1 text-xs font-mono font-medium"
-              >
-                {f.value === 'true' ? 'Lodging Included' : f.value}
-                <X className="h-3 w-3" />
-              </button>
+            {[filters.species, filters.state].filter(Boolean).map((v) => (
+              <span key={v} className="inline-flex items-center gap-1 bg-wht-ink text-wht-bone rounded-full px-3 py-1 text-xs font-mono font-medium">
+                {v}
+              </span>
             ))}
-            <button
-              onClick={() => setFilters({ species: '', state: '', weapon: '', price: '', lodging: false, guideType: '' })}
-              className="text-xs text-wht-blaze font-medium hover:underline"
-            >
+            {[...filters.weapons, ...filters.styles, ...filters.difficulty, ...filters.guideType].map((v) => (
+              <span key={v} className="inline-flex items-center gap-1 bg-wht-ink text-wht-bone rounded-full px-3 py-1 text-xs font-mono font-medium">{v}</span>
+            ))}
+            <button onClick={() => setFilters(defaultFilters)} className="text-xs text-wht-blaze font-medium hover:underline">
               Clear all
             </button>
           </div>
@@ -121,105 +181,147 @@ export default function BrowsePage() {
         <div className="flex gap-6">
           {/* Sidebar */}
           <aside className={`w-64 flex-shrink-0 ${sidebarOpen ? 'block' : 'hidden'} lg:block`}>
-            <div className="bg-white rounded-xl border-r border-wht-bone-2 p-5 sticky top-24">
+            <div className="bg-white rounded-xl border border-wht-bone-2 p-5 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
               <h2 className="font-mono text-wht-ink text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" /> Filters
               </h2>
 
-              <div className="space-y-5">
+              <div className="space-y-5 divide-y divide-wht-bone-2">
                 {/* Species */}
-                <div>
+                <div className="pt-0">
                   <label className="text-xs font-mono text-wht-stone uppercase tracking-wider mb-2 block">Species</label>
                   <Select value={filters.species} onChange={(e) => setFilters(p => ({ ...p, species: e.target.value }))} placeholder="All Species">
                     {SPECIES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </Select>
                 </div>
 
-                {/* State */}
-                <div>
-                  <label className="text-xs font-mono text-wht-stone uppercase tracking-wider mb-2 block">State</label>
-                  <Select value={filters.state} onChange={(e) => setFilters(p => ({ ...p, state: e.target.value }))} placeholder="All States">
+                {/* Location */}
+                <div className="pt-4">
+                  <label className="text-xs font-mono text-wht-stone uppercase tracking-wider mb-2 block">State / Province</label>
+                  <Select value={filters.state} onChange={(e) => setFilters(p => ({ ...p, state: e.target.value }))} placeholder="All Locations">
                     {STATES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </Select>
                 </div>
 
-                {/* Weapon */}
-                <div>
-                  <label className="text-xs font-mono text-wht-stone uppercase tracking-wider mb-2 block">Weapon Type</label>
-                  <div className="space-y-2">
-                    {WEAPON_TYPES.map((w) => (
-                      <label key={w} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={filters.weapon === w}
-                          onChange={() => setFilters(p => ({ ...p, weapon: p.weapon === w ? '' : w }))}
-                          className="rounded border-wht-bone-2 text-wht-ink focus:ring-wht-forest"
-                        />
-                        <span className="text-sm text-wht-ink font-body">{w}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Price */}
-                <div>
-                  <label className="text-xs font-mono text-wht-stone uppercase tracking-wider mb-2 block">Budget</label>
-                  <div className="space-y-2">
-                    {PRICE_RANGES.map((p) => (
-                      <label key={p.value} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="price"
-                          checked={filters.price === p.value}
-                          onChange={() => setFilters(prev => ({ ...prev, price: p.value }))}
-                          className="border-wht-bone-2 text-wht-ink focus:ring-wht-forest"
-                        />
-                        <span className="text-sm text-wht-ink font-body">{p.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Lodging */}
-                <div>
-                  <label className="flex items-center gap-2 cursor-pointer">
+                {/* Days */}
+                <div className="pt-4">
+                  <label className="text-xs font-mono text-wht-stone uppercase tracking-wider mb-2 block">Number of Days</label>
+                  <div className="flex gap-2">
                     <input
-                      type="checkbox"
-                      checked={filters.lodging}
-                      onChange={(e) => setFilters(p => ({ ...p, lodging: e.target.checked }))}
-                      className="rounded border-wht-bone-2 text-wht-ink focus:ring-wht-forest"
+                      type="number"
+                      placeholder="Min"
+                      min={1}
+                      value={filters.daysMin}
+                      onChange={(e) => setFilters(p => ({ ...p, daysMin: e.target.value }))}
+                      className="w-full border border-wht-bone-2 rounded-lg px-3 py-2 text-sm text-wht-ink focus:outline-none focus:ring-2 focus:ring-wht-forest"
                     />
-                    <span className="text-sm font-medium text-wht-ink font-body">Lodging Included</span>
-                  </label>
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      min={1}
+                      value={filters.daysMax}
+                      onChange={(e) => setFilters(p => ({ ...p, daysMax: e.target.value }))}
+                      className="w-full border border-wht-bone-2 rounded-lg px-3 py-2 text-sm text-wht-ink focus:outline-none focus:ring-2 focus:ring-wht-forest"
+                    />
+                  </div>
+                </div>
+
+                {/* Max Price */}
+                <div className="pt-4">
+                  <label className="text-xs font-mono text-wht-stone uppercase tracking-wider mb-2 block">Max Price (per person)</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 5000"
+                    min={0}
+                    value={filters.maxPrice}
+                    onChange={(e) => setFilters(p => ({ ...p, maxPrice: e.target.value }))}
+                    className="w-full border border-wht-bone-2 rounded-lg px-3 py-2 text-sm text-wht-ink focus:outline-none focus:ring-2 focus:ring-wht-forest"
+                  />
+                </div>
+
+                {/* Weapon */}
+                <div className="pt-4">
+                  <FilterCheckboxGroup
+                    label="Weapon"
+                    options={WEAPON_TYPES}
+                    selected={filters.weapons}
+                    onChange={(v) => setFilters(p => ({ ...p, weapons: v }))}
+                  />
+                </div>
+
+                {/* Style */}
+                <div className="pt-4">
+                  <FilterCheckboxGroup
+                    label="Hunting Style"
+                    options={HUNTING_STYLES}
+                    selected={filters.styles}
+                    onChange={(v) => setFilters(p => ({ ...p, styles: v }))}
+                  />
+                </div>
+
+                {/* Difficulty */}
+                <div className="pt-4">
+                  <FilterCheckboxGroup
+                    label="Difficulty"
+                    options={DIFFICULTY_OPTIONS}
+                    selected={filters.difficulty}
+                    onChange={(v) => setFilters(p => ({ ...p, difficulty: v }))}
+                  />
                 </div>
 
                 {/* Guide Type */}
-                <div>
-                  <label className="text-xs font-mono text-wht-stone uppercase tracking-wider mb-2 block">Guide Type</label>
-                  <div className="space-y-2">
-                    {['Fully Guided', 'Semi-Guided', 'Self-Guided'].map((g) => (
-                      <label key={g} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="guide"
-                          checked={filters.guideType === g}
-                          onChange={() => setFilters(p => ({ ...p, guideType: g }))}
-                          className="border-wht-bone-2 text-wht-ink focus:ring-wht-forest"
-                        />
-                        <span className="text-sm text-wht-ink font-body">{g}</span>
-                      </label>
-                    ))}
+                <div className="pt-4">
+                  <FilterCheckboxGroup
+                    label="Guide Type"
+                    options={GUIDE_OPTIONS}
+                    selected={filters.guideType}
+                    onChange={(v) => setFilters(p => ({ ...p, guideType: v }))}
+                  />
+                </div>
+
+                {/* Property Size */}
+                <div className="pt-4">
+                  <label className="text-xs font-mono text-wht-stone uppercase tracking-wider mb-2 block">Property Size (acres)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      min={0}
+                      value={filters.propertySizeMin}
+                      onChange={(e) => setFilters(p => ({ ...p, propertySizeMin: e.target.value }))}
+                      className="w-full border border-wht-bone-2 rounded-lg px-3 py-2 text-sm text-wht-ink focus:outline-none focus:ring-2 focus:ring-wht-forest"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      min={0}
+                      value={filters.propertySizeMax}
+                      onChange={(e) => setFilters(p => ({ ...p, propertySizeMax: e.target.value }))}
+                      className="w-full border border-wht-bone-2 rounded-lg px-3 py-2 text-sm text-wht-ink focus:outline-none focus:ring-2 focus:ring-wht-forest"
+                    />
                   </div>
                 </div>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => setFilters({ species: '', state: '', weapon: '', price: '', lodging: false, guideType: '' })}
-                >
-                  Clear Filters
-                </Button>
+                {/* Yes/No toggles */}
+                <div className="pt-4 space-y-2.5">
+                  <YesNoFilter label="Lodging Included" value={filters.lodging} onChange={(v) => setFilters(p => ({ ...p, lodging: v }))} />
+                  <YesNoFilter label="Meals Included" value={filters.meals} onChange={(v) => setFilters(p => ({ ...p, meals: v }))} />
+                  <YesNoFilter label="Guaranteed Tags" value={filters.guaranteedTags} onChange={(v) => setFilters(p => ({ ...p, guaranteedTags: v }))} />
+                  <YesNoFilter label="Baited" value={filters.baited} onChange={(v) => setFilters(p => ({ ...p, baited: v }))} />
+                  <YesNoFilter label="High Fenced / Estate" value={filters.fenced} onChange={(v) => setFilters(p => ({ ...p, fenced: v }))} />
+                  <YesNoFilter label="Non-Hunting Activities" value={filters.nonHunting} onChange={(v) => setFilters(p => ({ ...p, nonHunting: v }))} />
+                </div>
+
+                <div className="pt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => setFilters(defaultFilters)}
+                  >
+                    Clear All Filters
+                  </Button>
+                </div>
               </div>
             </div>
           </aside>

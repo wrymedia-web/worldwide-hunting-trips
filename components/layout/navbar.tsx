@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button'
 
 const navLinks = [
   { href: '/browse', label: 'Browse Hunts' },
-  { href: '/outfitters', label: 'Browse Outfitters' },
-  { href: '/states', label: 'States' },
-  { href: '/species', label: 'Species' },
+  { href: '/hunt-customizer', label: 'Hunt Customizer' },
+  { href: '/outfitters', label: 'Outfitters' },
+  { href: '/about', label: 'About' },
 ]
 
 export function Navbar() {

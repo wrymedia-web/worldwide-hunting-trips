@@ -27,6 +27,7 @@ export function Footer() {
             <h4 className="text-wht-bone font-semibold text-sm mb-4 uppercase tracking-wider font-mono">Browse</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/browse" className="hover:text-wht-blaze transition-colors">Browse Hunts</Link></li>
+              <li><Link href="/hunt-customizer" className="hover:text-wht-blaze transition-colors">Hunt Customizer</Link></li>
               <li><Link href="/outfitters" className="hover:text-wht-blaze transition-colors">Browse Outfitters</Link></li>
               <li><Link href="/states" className="hover:text-wht-blaze transition-colors">Browse by State</Link></li>
               <li><Link href="/species" className="hover:text-wht-blaze transition-colors">Browse by Species</Link></li>
@@ -37,7 +38,7 @@ export function Footer() {
           <div>
             <h4 className="text-wht-bone font-semibold text-sm mb-4 uppercase tracking-wider font-mono">Company</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/about" className="hover:text-wht-blaze transition-colors">About</Link></li>
+              <li><Link href="/about" className="hover:text-wht-blaze transition-colors">About Find My Hunt</Link></li>
               <li><Link href="/contact" className="hover:text-wht-blaze transition-colors">Contact</Link></li>
               <li><Link href="/signup?type=outfitter" className="hover:text-wht-blaze transition-colors">List Your Outfitter</Link></li>
             </ul>
@@ -57,8 +58,16 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-wht-ink-2 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-wht-stone">
-          <p>&copy; {new Date().getFullYear()} Worldwide Hunting Trips. All rights reserved.</p>
+        {/* Disclaimer */}
+        <div className="mt-8 p-4 bg-wht-ink-2 rounded-lg border border-wht-forest/40">
+          <p className="text-xs text-wht-stone leading-relaxed">
+            <span className="text-wht-fog font-semibold">Disclaimer: </span>
+            There are many reputable outfitters around the world; however, the risk of fraud is real. Hunters are responsible for conducting their own due diligence, including verifying credentials, checking references, and ensuring the outfitter they select is legitimate. Find My Hunt does not endorse, verify, or guarantee any outfitter listed on this platform.
+          </p>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-wht-ink-2 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-wht-stone">
+          <p>&copy; {new Date().getFullYear()} Find My Hunt. All rights reserved.</p>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:text-wht-fog transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-wht-fog transition-colors">Terms of Service</Link>
