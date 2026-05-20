@@ -13,6 +13,7 @@ export interface OutfitterCardProps {
   reviewCount: number
   yearsInBusiness?: number
   verified?: boolean
+  isExample?: boolean
 }
 
 export function OutfitterCard({
@@ -25,6 +26,7 @@ export function OutfitterCard({
   reviewCount,
   yearsInBusiness,
   verified = false,
+  isExample = false,
 }: OutfitterCardProps) {
   const topSpecies = species.slice(0, 3)
 
@@ -39,11 +41,16 @@ export function OutfitterCard({
             ))}
           </div>
         </div>
-        {verified && (
-          <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 flex gap-1.5">
+          {isExample && (
+            <span className="inline-flex items-center rounded-full bg-amber-400 px-2.5 py-1 text-xs font-bold text-amber-900 uppercase tracking-wide shadow">
+              Example
+            </span>
+          )}
+          {verified && (
             <Badge variant="copper" className="text-xs">Verified</Badge>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Content */}

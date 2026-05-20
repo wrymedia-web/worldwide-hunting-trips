@@ -15,6 +15,7 @@ export const mockHunts: HuntCardProps[] = [
     lodgingIncluded: true,
     guideType: 'fully_guided',
     priceType: 'per_person',
+    isExample: true,
   },
   {
     id: 'premium-elk-colorado',
@@ -29,6 +30,7 @@ export const mockHunts: HuntCardProps[] = [
     lodgingIncluded: true,
     guideType: 'fully_guided',
     priceType: 'per_person',
+    isExample: true,
   },
   {
     id: 'mule-deer-wyoming',
@@ -43,6 +45,7 @@ export const mockHunts: HuntCardProps[] = [
     lodgingIncluded: false,
     guideType: 'fully_guided',
     priceType: 'per_person',
+    isExample: true,
   },
   {
     id: 'black-bear-montana',
@@ -57,6 +60,7 @@ export const mockHunts: HuntCardProps[] = [
     lodgingIncluded: true,
     guideType: 'fully_guided',
     priceType: 'per_person',
+    isExample: true,
   },
   {
     id: 'pronghorn-wyoming',
@@ -71,6 +75,7 @@ export const mockHunts: HuntCardProps[] = [
     lodgingIncluded: false,
     guideType: 'semi_guided',
     priceType: 'per_person',
+    isExample: true,
   },
   {
     id: 'wild-boar-texas',
@@ -85,6 +90,7 @@ export const mockHunts: HuntCardProps[] = [
     lodgingIncluded: true,
     guideType: 'fully_guided',
     priceType: 'per_person',
+    isExample: true,
   },
   {
     id: 'moose-alaska',
@@ -99,6 +105,7 @@ export const mockHunts: HuntCardProps[] = [
     lodgingIncluded: true,
     guideType: 'fully_guided',
     priceType: 'per_person',
+    isExample: true,
   },
   {
     id: 'turkey-kansas',
@@ -113,6 +120,7 @@ export const mockHunts: HuntCardProps[] = [
     lodgingIncluded: false,
     guideType: 'fully_guided',
     priceType: 'per_person',
+    isExample: true,
   },
   {
     id: 'bighorn-new-mexico',
@@ -127,6 +135,7 @@ export const mockHunts: HuntCardProps[] = [
     lodgingIncluded: true,
     guideType: 'fully_guided',
     priceType: 'per_person',
+    isExample: true,
   },
   {
     id: 'coues-deer-arizona',
@@ -141,6 +150,7 @@ export const mockHunts: HuntCardProps[] = [
     lodgingIncluded: false,
     guideType: 'fully_guided',
     priceType: 'per_person',
+    isExample: true,
   },
   {
     id: 'whitetail-kansas',
@@ -155,6 +165,7 @@ export const mockHunts: HuntCardProps[] = [
     lodgingIncluded: true,
     guideType: 'fully_guided',
     priceType: 'per_person',
+    isExample: true,
   },
   {
     id: 'bison-montana',
@@ -169,6 +180,7 @@ export const mockHunts: HuntCardProps[] = [
     lodgingIncluded: true,
     guideType: 'fully_guided',
     priceType: 'per_person',
+    isExample: true,
   },
 ]
 
@@ -183,6 +195,7 @@ export const mockOutfitters: OutfitterCardProps[] = [
     reviewCount: 124,
     yearsInBusiness: 18,
     verified: true,
+    isExample: true,
   },
   {
     id: 'rockies-wilderness',
@@ -194,6 +207,7 @@ export const mockOutfitters: OutfitterCardProps[] = [
     reviewCount: 203,
     yearsInBusiness: 24,
     verified: true,
+    isExample: true,
   },
   {
     id: 'wind-river',
@@ -205,6 +219,7 @@ export const mockOutfitters: OutfitterCardProps[] = [
     reviewCount: 87,
     yearsInBusiness: 12,
     verified: true,
+    isExample: true,
   },
   {
     id: 'big-sky-adventures',
@@ -216,6 +231,7 @@ export const mockOutfitters: OutfitterCardProps[] = [
     reviewCount: 156,
     yearsInBusiness: 20,
     verified: false,
+    isExample: true,
   },
   {
     id: 'lone-star-outfitters',
@@ -227,6 +243,7 @@ export const mockOutfitters: OutfitterCardProps[] = [
     reviewCount: 311,
     yearsInBusiness: 15,
     verified: true,
+    isExample: true,
   },
   {
     id: 'alaska-wilderness',
@@ -238,6 +255,7 @@ export const mockOutfitters: OutfitterCardProps[] = [
     reviewCount: 98,
     yearsInBusiness: 30,
     verified: true,
+    isExample: true,
   },
   {
     id: 'southwest-trophy',
@@ -249,6 +267,7 @@ export const mockOutfitters: OutfitterCardProps[] = [
     reviewCount: 61,
     yearsInBusiness: 9,
     verified: true,
+    isExample: true,
   },
   {
     id: 'flint-hills-outfitters',
@@ -260,5 +279,6 @@ export const mockOutfitters: OutfitterCardProps[] = [
     reviewCount: 145,
     yearsInBusiness: 11,
     verified: false,
+    isExample: true,
   },
 ]

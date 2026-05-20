@@ -17,6 +17,7 @@ export interface HuntCardProps {
   lodgingIncluded: boolean
   guideType: 'fully_guided' | 'semi_guided' | 'self_guided'
   priceType?: 'per_person' | 'per_day' | 'flat'
+  isExample?: boolean
 }
 
 function getGuideLabel(type: HuntCardProps['guideType']) {
@@ -51,6 +52,7 @@ export function HuntCard({
   lodgingIncluded,
   guideType,
   priceType = 'per_person',
+  isExample = false,
 }: HuntCardProps) {
   const priceLabel = priceType === 'per_day' ? '/day' : priceType === 'flat' ? ' flat' : '/person'
 
@@ -76,6 +78,13 @@ export function HuntCard({
             </Badge>
           )}
         </div>
+        {isExample && (
+          <div className="absolute top-3 right-3">
+            <span className="inline-flex items-center rounded-full bg-amber-400 px-2.5 py-1 text-xs font-bold text-amber-900 uppercase tracking-wide shadow">
+              Example
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
