@@ -124,7 +124,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center text-sm text-gray-500">
             Don&apos;t have an account?{' '}
             <Link href="/signup" className="text-wht-blaze font-semibold hover:underline">
-              Sign up free
+              Sign up
             </Link>
           </div>
         </div>

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { X, SlidersHorizontal, ChevronDown } from 'lucide-react'
+import { Suspense, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { SlidersHorizontal } from 'lucide-react'
 import { HuntCard } from '@/components/hunt-card'
 import { Select } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -25,6 +26,20 @@ const WEAPON_TYPES = ['Rifle', 'Muzzleloader', 'Bow', 'Crossbow', 'Shotgun']
 const HUNTING_STYLES = ['Spot & Stalk', 'Blind', 'Tree Stand', 'Driven', 'Hounds']
 const DIFFICULTY_OPTIONS = ['Easy', 'Moderate', 'Hard']
 const GUIDE_OPTIONS = ['Fully Guided', 'Semi-Guided', 'Self-Guided']
+
+// Map the homepage search bar's price-range keys to an upper bound (per person).
+const PRICE_RANGE_MAX: Record<string, number> = {
+  'under-1k': 1000,
+  '1k-3k': 3000,
+  '3k-5k': 5000,
+}
+
+// Browse UI guide labels → the value stored on a hunt.
+const GUIDE_TYPE_VALUE: Record<string, string> = {
+  'Fully Guided': 'fully_guided',
+  'Semi-Guided': 'semi_guided',
+  'Self-Guided': 'self_guided',
+}
 
 const SORT_OPTIONS = [
   { label: 'Featured', value: 'featured' },
@@ -118,8 +133,35 @@ function YesNoFilter({ label, value, onChange }: { label: string; value: boolean
   )
 }
 
-export default function BrowsePage() {
-  const [filters, setFilters] = useState<Filters>(defaultFilters)
+function sortHunts(hunts: typeof mockHunts, sort: string): typeof mockHunts {
+  const copy = [...hunts]
+  switch (sort) {
+    case 'price-asc':
+      return copy.sort((a, b) => a.pricePerPerson - b.pricePerPerson)
+    case 'price-desc':
+      return copy.sort((a, b) => b.pricePerPerson - a.pricePerPerson)
+    case 'rating':
+      return copy.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+    default:
+      return copy
+  }
+}
+
+function BrowseContent() {
+  const searchParams = useSearchParams()
+
+  // Seed filters from the homepage search bar (?species=&state=&weapon=&price=).
+  const [filters, setFilters] = useState<Filters>(() => {
+    const price = searchParams.get('price')
+    const weapon = searchParams.get('weapon')
+    return {
+      ...defaultFilters,
+      species: searchParams.get('species') || '',
+      state: searchParams.get('state') || '',
+      weapons: weapon ? [weapon] : [],
+      maxPrice: price && PRICE_RANGE_MAX[price] ? String(PRICE_RANGE_MAX[price]) : '',
+    }
+  })
   const [sort, setSort] = useState('featured')
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -130,6 +172,21 @@ export default function BrowsePage() {
   + filters.weapons.length + filters.styles.length + filters.difficulty.length + filters.guideType.length
   + [filters.lodging, filters.meals, filters.baited, filters.fenced, filters.guaranteedTags, filters.nonHunting].filter(Boolean).length
 
+  // Only fields present on the hunt records are enforced; the rest stay no-ops
+  // until listings carry that data (days, property size, style, difficulty, etc.).
+  const results = useMemo(() => {
+    const filtered = mockHunts.filter((h) => {
+      if (filters.species && h.species !== filters.species) return false
+      if (filters.state && h.state !== filters.state) return false
+      if (filters.maxPrice && h.pricePerPerson > Number(filters.maxPrice)) return false
+      if (filters.weapons.length && !filters.weapons.some((w) => h.weaponTypes?.includes(w))) return false
+      if (filters.guideType.length && !filters.guideType.some((g) => GUIDE_TYPE_VALUE[g] === h.guideType)) return false
+      if (filters.lodging && !h.lodgingIncluded) return false
+      return true
+    })
+    return sortHunts(filtered, sort)
+  }, [filters, sort])
+
   return (
     <div className="min-h-screen bg-wht-paper">
       {/* Page Header */}
@@ -137,7 +194,7 @@ export default function BrowsePage() {
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-heritage text-white tracking-tight">Browse Hunts</h1>
           <p className="text-wht-bone mt-1 text-sm font-body">
-            Showing <span className="font-semibold text-white">247 hunts</span> across the United States
+            Showing <span className="font-semibold text-white">{results.length}</span> {results.length === 1 ? 'hunt' : 'hunts'}
           </p>
         </div>
       </div>
@@ -331,7 +388,7 @@ export default function BrowsePage() {
             {/* Sort bar */}
             <div className="hidden lg:flex items-center justify-between mb-4">
               <p className="text-sm text-wht-stone font-body">
-                Showing <span className="font-semibold text-wht-ink">247</span> hunts
+                Showing <span className="font-semibold text-wht-ink">{results.length}</span> {results.length === 1 ? 'hunt' : 'hunts'}
               </p>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-wht-stone font-mono">Sort by:</span>
@@ -345,21 +402,30 @@ export default function BrowsePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-              {mockHunts.map((hunt) => (
-                <HuntCard key={hunt.id} {...hunt} />
-              ))}
-            </div>
-
-            {/* Load more */}
-            <div className="text-center mt-10">
-              <Button variant="outline" className="gap-2">
-                Load More Hunts <ChevronDown className="h-4 w-4" />
-              </Button>
-            </div>
+            {results.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                {results.map((hunt) => (
+                  <HuntCard key={hunt.id} {...hunt} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-wht-ink font-heritage text-xl mb-2">No hunts match your filters</p>
+                <p className="text-wht-stone text-sm font-body mb-6">Try widening your search or clearing a filter or two.</p>
+                <Button variant="outline" onClick={() => setFilters(defaultFilters)}>Clear All Filters</Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function BrowsePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-wht-paper" />}>
+      <BrowseContent />
+    </Suspense>
   )
 }

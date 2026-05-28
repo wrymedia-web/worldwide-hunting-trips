@@ -120,7 +120,7 @@ export default function SignupPage() {
                 <div className={`font-semibold text-sm ${accountType === 'outfitter' ? 'text-wht-blaze' : 'text-gray-600'}`}>
                   I&apos;m an Outfitter
                 </div>
-                <div className="text-xs text-gray-400">List hunts for free</div>
+                <div className="text-xs text-gray-400">List your hunts</div>
               </div>
             </button>
           </div>
@@ -213,7 +213,7 @@ export default function SignupPage() {
         {accountType === 'outfitter' && (
           <div className="mt-4 bg-wht-forest rounded-xl p-4 text-center">
             <p className="text-wht-bone text-sm">
-              <span className="font-bold text-wht-blaze">100% Free</span> — No monthly fees, no booking commissions, ever.
+              <span className="font-bold text-wht-blaze">No Booking Commissions</span> — just one low annual fee.
             </p>
           </div>
         )}

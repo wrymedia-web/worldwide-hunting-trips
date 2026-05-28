@@ -8,7 +8,7 @@ export default function AboutPage() {
       {/* Hero */}
       <div className="bg-wht-forest py-16 px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl sm:text-5xl font-heritage text-white tracking-tight mb-4">About Find My Hunt</h1>
+          <h1 className="text-4xl sm:text-5xl font-heritage text-white tracking-tight mb-4">About Worldwide Hunting Trips</h1>
           <p className="text-wht-bone font-body text-lg leading-relaxed">
             Built out of firsthand experience — and frustration — on both sides of the booking table.
           </p>
@@ -22,7 +22,7 @@ export default function AboutPage() {
             <h2 className="text-2xl font-heritage text-wht-ink mb-6">My name is Terrance Maier.</h2>
             <div className="space-y-4 text-wht-stone font-body leading-relaxed">
               <p>
-                Find My Hunt was created out of firsthand experience and frustration — both as an outfitter and an international hunter. I saw a clear need for a transparent hunt listing platform that truly benefits both sides.
+                Worldwide Hunting Trips was created out of firsthand experience and frustration — both as an outfitter and an international hunter. I saw a clear need for a transparent hunt listing platform that truly benefits both sides.
               </p>
               <p>
                 As a <span className="text-wht-ink font-semibold">hunter</span>, it was exhausting to navigate agents and brokers who were often focused on commissions rather than the right match for me. Many listings lacked critical details, forcing countless emails to outfitters — only to discover that most did not offer what I was actually looking for.
@@ -40,7 +40,7 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto text-center mb-12">
           <h2 className="text-3xl font-heritage text-white tracking-tight mb-3">A Better Way</h2>
           <p className="text-wht-bone font-body text-base leading-relaxed max-w-2xl mx-auto">
-            Find My Hunt gives outfitters a simple, affordable way to list all of their hunts in one place — packages, cancellations, last-minute deals, and show specials — for one low annual fee. In fact, the cost is less than what most outfitters pay in commission for a single booked hunt.
+            Worldwide Hunting Trips gives outfitters a simple, affordable way to list all of their hunts in one place — packages, cancellations, last-minute deals, and show specials — for one low annual fee. In fact, the cost is less than what most outfitters pay in commission for a single booked hunt.
           </p>
         </div>
 

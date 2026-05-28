@@ -279,11 +279,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why Find My Hunt */}
+      {/* Why Worldwide Hunting Trips */}
       <section className="py-16 bg-wht-paper">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-heritage text-wht-ink tracking-tight">Why Find My Hunt?</h2>
+            <h2 className="text-3xl font-heritage text-wht-ink tracking-tight">Why Worldwide Hunting Trips?</h2>
             <p className="text-wht-stone mt-2 font-body max-w-2xl mx-auto">Built by a hunter and outfitter who got tired of the same problems on both sides.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -416,25 +416,25 @@ export default function HomePage() {
           <div className="inline-flex items-center gap-2 bg-wht-blaze/20 border border-wht-blaze/40 rounded-full px-4 py-1.5 mb-6">
             <CheckCircle className="h-3.5 w-3.5 text-wht-blaze" />
             <span className="text-wht-bone text-xs font-mono font-semibold tracking-wide uppercase">
-              Free Forever for Outfitters
+              Built for Outfitters
             </span>
           </div>
 
           <h2 className="text-4xl font-heritage text-white tracking-tight mb-4">
-            List Your Hunts for Free
+            List Your Hunts
           </h2>
           <p className="text-wht-bone text-lg leading-relaxed mb-4 max-w-2xl mx-auto font-body">
             Reach thousands of hunters nationwide. Create your outfitter profile, list your hunts,
-            and connect directly with clients — completely free, with zero commissions.
+            and connect directly with clients — no booking commissions, just one low annual fee.
           </p>
           <p className="text-wht-fog text-sm mb-8 font-body">
-            No monthly fees. No booking commissions. No platform cuts. Ever.
+            No booking commissions. No platform cuts. Just one low annual fee.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/signup?type=outfitter">
               <Button variant="default" size="xl">
-                Get Listed Free
+                List Your Hunts
                 <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>

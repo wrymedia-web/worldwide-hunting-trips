@@ -149,7 +149,7 @@ export default function HuntDetailPage() {
   const handleContact = () => {
     const subject = encodeURIComponent(`Inquiry: ${mockHunt.title}`)
     const body = encodeURIComponent(
-      `Hi,\n\nI'm interested in the following hunt listing on Find My Hunt:\n\n` +
+      `Hi,\n\nI'm interested in the following hunt listing on Worldwide Hunting Trips:\n\n` +
       `Hunt: ${mockHunt.title}\n` +
       `Outfitter: ${mockHunt.outfitterName}\n` +
       `Location: ${mockHunt.state}, ${mockHunt.country}\n` +

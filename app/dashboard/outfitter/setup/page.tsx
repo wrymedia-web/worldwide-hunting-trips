@@ -71,7 +71,7 @@ export default function OutfitterSetupPage() {
               Set Up Your Outfitter Profile
             </h1>
             <p className="text-gray-500 text-sm max-w-md mx-auto">
-              Welcome to Worldwide Hunting Trips. Tell hunters about your operation — 100% free, no commissions ever.
+              Welcome to Worldwide Hunting Trips. Tell hunters about your operation — no booking commissions, just one low annual fee.
             </p>
           </div>
 
@@ -231,7 +231,7 @@ export default function OutfitterSetupPage() {
 
         <div className="mt-4 bg-wht-forest rounded-xl p-4 text-center">
           <p className="text-wht-bone text-sm">
-            <span className="font-bold text-wht-blaze">100% Free</span> — No monthly fees, no booking commissions, ever.
+            <span className="font-bold text-wht-blaze">No Booking Commissions</span> — just one low annual fee.
           </p>
         </div>
       </div>
