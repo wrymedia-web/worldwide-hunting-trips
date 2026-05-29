@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { MapPin, ArrowLeft } from 'lucide-react'
 import { HuntCard } from '@/components/hunt-card'
-import { mockHunts } from '@/lib/mock-data'
+import { getListingsByState } from '@/lib/listings'
 
 interface StatePageProps {
   params: Promise<{ state: string }>
@@ -47,11 +47,7 @@ export default async function StateHuntsPage({ params }: StatePageProps) {
   const stateName = formatStateName(state)
   const info = stateInfo[state]
 
-  // Filter hunts for this state (using mock data — in production, fetch from DB)
-  const stateHunts = mockHunts.filter(
-    (h) => h.state.toLowerCase() === stateName.toLowerCase()
-  )
-  const displayHunts = stateHunts.length > 0 ? stateHunts : mockHunts.slice(0, 6)
+  const displayHunts = await getListingsByState(stateName)
 
   return (
     <div className="min-h-screen bg-wht-paper">

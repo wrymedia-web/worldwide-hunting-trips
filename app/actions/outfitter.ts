@@ -164,11 +164,19 @@ export async function createHuntListing(
   const speciesRaw = formData.get('species_id')
   const species_id = speciesRaw && (speciesRaw as string).trim() ? (speciesRaw as string).trim() : null
 
+  const countryRaw = formData.get('country_id')
+  const country_id = countryRaw && (countryRaw as string).trim() ? parseInt(countryRaw as string, 10) : null
+
+  const regionRaw = formData.get('region_id')
+  const region_id = regionRaw && (regionRaw as string).trim() ? parseInt(regionRaw as string, 10) : null
+
   const payload = {
     outfitter_id: outfitterId,
     title,
     slug,
     species_id,
+    country_id,
+    region_id,
     state: (formData.get('state') as string | null)?.trim() ?? '',
     description: (formData.get('description') as string | null)?.trim() ?? '',
     price_per_person,
@@ -261,9 +269,17 @@ export async function updateHuntListing(
   const speciesRaw = formData.get('species_id')
   const species_id = speciesRaw && (speciesRaw as string).trim() ? (speciesRaw as string).trim() : null
 
+  const countryRaw = formData.get('country_id')
+  const country_id = countryRaw && (countryRaw as string).trim() ? parseInt(countryRaw as string, 10) : null
+
+  const regionRaw = formData.get('region_id')
+  const region_id = regionRaw && (regionRaw as string).trim() ? parseInt(regionRaw as string, 10) : null
+
   const payload = {
     title: (formData.get('title') as string | null)?.trim() ?? '',
     species_id,
+    country_id,
+    region_id,
     state: (formData.get('state') as string | null)?.trim() ?? '',
     description: (formData.get('description') as string | null)?.trim() ?? '',
     price_per_person,

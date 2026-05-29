@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import Image from 'next/image'
@@ -10,7 +9,6 @@ import { Input } from '@/components/ui/input'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -37,12 +35,12 @@ export default function LoginPage() {
         .eq('id', data.user.id)
         .single()
 
-      if (profile?.role === 'outfitter') {
-        router.push('/dashboard/outfitter')
-      } else {
-        router.push('/dashboard/hunter')
-      }
-      router.refresh()
+      // Hard navigation so the auth cookie is sent on the next request and middleware
+      // sees the session (a soft router.push + refresh can cancel each other out).
+      window.location.assign(
+        profile?.role === 'outfitter' ? '/dashboard/outfitter' : '/dashboard/hunter'
+      )
+      return
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.')
     } finally {

@@ -34,11 +34,22 @@ export default async function NewHuntListingPage() {
 
   const speciesOptions: SpeciesRow[] = (speciesRows ?? []) as SpeciesRow[]
 
+  const { data: countryRows } = await supabase
+    .from('countries')
+    .select('id, name, slug')
+    .order('sort_order')
+  const { data: regionRows } = await supabase
+    .from('regions')
+    .select('id, name, country_id')
+    .order('name')
+
   return (
     <HuntListingForm
       mode="create"
       outfitterId={outfitter.id}
       speciesOptions={speciesOptions}
+      countries={countryRows ?? []}
+      regions={regionRows ?? []}
     />
   )
 }

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { MapPin, Eye, EyeOff, Crosshair, Mountain, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -12,7 +11,6 @@ import { createProfile } from '@/app/actions/auth'
 type AccountType = 'hunter' | 'outfitter'
 
 export default function SignupPage() {
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [accountType, setAccountType] = useState<AccountType>('hunter')
   const [formData, setFormData] = useState({
@@ -56,8 +54,13 @@ export default function SignupPage() {
       const { error: profileError } = await createProfile(user.id, accountType, formData.email)
       if (profileError) { setError(profileError); return }
 
-      router.push(accountType === 'outfitter' ? '/dashboard/outfitter/setup' : '/dashboard/hunter')
-      router.refresh()
+      // Hard navigation so the freshly-set auth cookie is sent with the next request
+      // and middleware sees the session. A soft router.push + refresh can cancel each
+      // other out, leaving the user stranded on /signup with a valid session.
+      window.location.assign(
+        accountType === 'outfitter' ? '/dashboard/outfitter/setup' : '/dashboard/hunter'
+      )
+      return
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.')
     } finally {

@@ -1,11 +1,9 @@
 import Link from 'next/link'
-import { ArrowRight, CheckCircle, MessageSquare, DollarSign, Search, Star, Tag, Wrench, ShieldCheck } from 'lucide-react'
+import { ArrowRight, CheckCircle, MessageSquare, DollarSign, Search, Star, Tag, Wrench, ShieldCheck, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HuntCard } from '@/components/hunt-card'
 import { SearchBar } from '@/components/search-bar'
-import { mockHunts } from '@/lib/mock-data'
-
-const featuredHunts = mockHunts.slice(0, 6)
+import { getActiveListings, getActiveCountries } from '@/lib/listings'
 
 const dealHunts = [
   {
@@ -107,7 +105,10 @@ const howItWorks = [
   },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [featured, countries] = await Promise.all([getActiveListings(), getActiveCountries()])
+  const featuredHunts = featured.slice(0, 6)
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -409,6 +410,42 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Hunt Worldwide */}
+      {countries.length > 0 && (
+        <section className="py-16 bg-wht-paper">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Globe className="h-5 w-5 text-wht-blaze" />
+                  <span className="text-xs font-mono text-wht-blaze uppercase tracking-widest">Hunt Worldwide</span>
+                </div>
+                <h2 className="text-3xl font-heritage text-wht-ink tracking-tight">Browse by Destination</h2>
+                <p className="text-wht-stone mt-1 font-body">From the U.S. heartland to Africa, Patagonia, and the Southern Alps</p>
+              </div>
+              <Link href="/destinations" className="hidden sm:flex items-center gap-1 text-wht-blaze font-semibold hover:underline text-sm">
+                All destinations <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {countries.map((c) => (
+                <Link
+                  key={c.slug}
+                  href={`/destinations/${c.slug}`}
+                  className="group bg-white rounded-xl p-4 text-center border border-wht-bone-2 hover:border-wht-blaze hover:shadow-md transition-all"
+                >
+                  <div className="text-3xl mb-2">{c.emoji ?? '🌍'}</div>
+                  <div className="text-xs font-semibold text-wht-ink group-hover:text-wht-blaze transition-colors leading-tight font-body">
+                    {c.name}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* For Outfitters CTA */}
       <section className="py-20 bg-wht-forest">

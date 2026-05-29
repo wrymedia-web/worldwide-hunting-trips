@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { HuntCard } from '@/components/hunt-card'
-import { mockHunts } from '@/lib/mock-data'
+import { getListingsBySpecies } from '@/lib/listings'
 
 interface SpeciesPageProps {
   params: Promise<{ species: string }>
@@ -84,10 +84,7 @@ export default async function SpeciesHuntsPage({ params }: SpeciesPageProps) {
   const speciesName = formatSpeciesName(species)
   const info = speciesInfo[species]
 
-  const speciesHunts = mockHunts.filter(
-    (h) => h.species.toLowerCase() === speciesName.toLowerCase()
-  )
-  const displayHunts = speciesHunts.length > 0 ? speciesHunts : mockHunts.slice(0, 6)
+  const displayHunts = await getListingsBySpecies(species)
 
   return (
     <div className="min-h-screen bg-wht-paper">

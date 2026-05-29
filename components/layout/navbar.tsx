@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 
 const navLinks = [
   { href: '/browse', label: 'Browse Hunts' },
+  { href: '/destinations', label: 'Destinations' },
   { href: '/hunt-customizer', label: 'Hunt Customizer' },
   { href: '/outfitters', label: 'Outfitters' },
   { href: '/about', label: 'About' },

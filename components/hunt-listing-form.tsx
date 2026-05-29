@@ -22,14 +22,30 @@ interface SpeciesOption {
   category: string
 }
 
+interface CountryOption {
+  id: number
+  name: string
+  slug: string
+}
+
+interface RegionOption {
+  id: number
+  name: string
+  country_id: number
+}
+
 interface HuntListingFormProps {
   mode: 'create' | 'edit'
   outfitterId: string
   listingId?: string
   speciesOptions: SpeciesOption[]
+  countries: CountryOption[]
+  regions: RegionOption[]
   defaultValues?: Partial<{
     title: string
     species_id: string
+    country_id: number | null
+    region_id: number | null
     state: string
     description: string
     price_per_person: number
@@ -64,6 +80,8 @@ export default function HuntListingForm({
   outfitterId,
   listingId,
   speciesOptions,
+  countries,
+  regions,
   defaultValues = {},
 }: HuntListingFormProps) {
   const router = useRouter()
@@ -74,6 +92,14 @@ export default function HuntListingForm({
 
   const dv = defaultValues
   const groupedSpecies = groupSpecies(speciesOptions)
+
+  const usCountry = countries.find((c) => c.slug === 'united-states')
+  const [countryId, setCountryId] = useState<string>(
+    dv.country_id ? String(dv.country_id) : usCountry ? String(usCountry.id) : ''
+  )
+  const selectedCountry = countries.find((c) => String(c.id) === countryId)
+  const isUS = selectedCountry?.slug === 'united-states'
+  const countryRegions = regions.filter((r) => String(r.country_id) === countryId)
 
   const [lodging, setLodging] = useState(dv.lodging_included ?? false)
   const [meals, setMeals] = useState(dv.meals_included ?? false)
@@ -191,20 +217,70 @@ export default function HuntListingForm({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    State <span className="text-wht-blaze">*</span>
+                    Country <span className="text-wht-blaze">*</span>
                   </label>
                   <select
-                    name="state"
-                    defaultValue={dv.state ?? ''}
+                    name="country_id"
+                    value={countryId}
+                    onChange={(e) => setCountryId(e.target.value)}
                     required
                     className="flex h-10 w-full rounded-md border border-[#d4cfc6] bg-white px-3 py-2 text-sm text-wht-ink focus:outline-none focus:ring-2 focus:ring-wht-forest"
                   >
-                    <option value="" disabled>Select a state</option>
-                    {US_STATES.map((s) => (
-                      <option key={s} value={s}>{s}</option>
+                    <option value="" disabled>Select a country</option>
+                    {countries.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    {isUS ? 'State' : 'Region / Area'} <span className="text-wht-blaze">*</span>
+                  </label>
+                  {isUS ? (
+                    <select
+                      key="state-us"
+                      name="state"
+                      defaultValue={dv.state ?? ''}
+                      required
+                      className="flex h-10 w-full rounded-md border border-[#d4cfc6] bg-white px-3 py-2 text-sm text-wht-ink focus:outline-none focus:ring-2 focus:ring-wht-forest"
+                    >
+                      <option value="" disabled>Select a state</option>
+                      {US_STATES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <Input
+                      key="state-intl"
+                      name="state"
+                      type="text"
+                      required
+                      defaultValue={dv.state ?? ''}
+                      placeholder="e.g. Limpopo, Patagonia, South Island"
+                    />
+                  )}
+                </div>
+
+                {countryRegions.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Region <span className="text-gray-400 font-normal">(optional)</span>
+                    </label>
+                    <select
+                      name="region_id"
+                      defaultValue={dv.region_id ? String(dv.region_id) : ''}
+                      className="flex h-10 w-full rounded-md border border-[#d4cfc6] bg-white px-3 py-2 text-sm text-wht-ink focus:outline-none focus:ring-2 focus:ring-wht-forest"
+                    >
+                      <option value="">Select a region</option>
+                      {countryRegions.map((r) => (
+                        <option key={r.id} value={r.id}>{r.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               <div>

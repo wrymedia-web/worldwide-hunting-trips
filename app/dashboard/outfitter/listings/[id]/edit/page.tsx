@@ -14,6 +14,8 @@ interface HuntListingRow {
   outfitter_id: string
   title: string
   species_id: string | null
+  country_id: number | null
+  region_id: number | null
   state: string
   description: string
   price_per_person: number
@@ -81,15 +83,28 @@ export default async function EditHuntListingPage({
 
   const speciesOptions: SpeciesRow[] = (speciesRows ?? []) as SpeciesRow[]
 
+  const { data: countryRows } = await supabase
+    .from('countries')
+    .select('id, name, slug')
+    .order('sort_order')
+  const { data: regionRows } = await supabase
+    .from('regions')
+    .select('id, name, country_id')
+    .order('name')
+
   return (
     <HuntListingForm
       mode="edit"
       outfitterId={outfitter.id}
       listingId={id}
       speciesOptions={speciesOptions}
+      countries={countryRows ?? []}
+      regions={regionRows ?? []}
       defaultValues={{
         title: listing.title,
         species_id: listing.species_id ?? undefined,
+        country_id: listing.country_id,
+        region_id: listing.region_id,
         state: listing.state,
         description: listing.description,
         price_per_person: listing.price_per_person,
