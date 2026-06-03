@@ -21,10 +21,12 @@ export default function SignupPage() {
   })
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [emailExists, setEmailExists] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setEmailExists(false)
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match.')
@@ -46,10 +48,25 @@ export default function SignupPage() {
         options: { data: { full_name: formData.fullName, role: accountType } },
       })
 
-      if (signUpError) { setError(signUpError.message); return }
+      if (signUpError) {
+        const msg = signUpError.message.toLowerCase()
+        if (msg.includes('already registered') || msg.includes('already been registered') || msg.includes('user already')) {
+          setEmailExists(true)
+          setError('An account with this email already exists.')
+        } else {
+          setError(signUpError.message)
+        }
+        return
+      }
 
       const user = data.user
-      if (!user) { setError('Signup failed. Please try again.'); return }
+      // Supabase returns a synthetic user with no identities when the email is
+      // already taken (anti-enumeration). Treat that as "already exists" too.
+      if (!user || (Array.isArray(user.identities) && user.identities.length === 0)) {
+        setEmailExists(true)
+        setError('An account with this email already exists.')
+        return
+      }
 
       const { error: profileError } = await createProfile(user.id, accountType, formData.email)
       if (profileError) { setError(profileError); return }
@@ -131,6 +148,13 @@ export default function SignupPage() {
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4 text-sm text-red-700">
               {error}
+              {emailExists && (
+                <div className="mt-2">
+                  <Link href="/login" className="font-semibold text-wht-blaze hover:underline">
+                    Sign in instead →
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 

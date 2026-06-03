@@ -67,7 +67,16 @@ export default async function StateHuntsPage({ params }: StatePageProps) {
             {stateName} Hunting
           </h1>
           <p className="text-wht-bone mt-1 text-sm">
-            <span className="font-semibold text-white">{displayHunts.length}+ hunt packages</span> available in {stateName}
+            {displayHunts.length > 0 ? (
+              <>
+                <span className="font-semibold text-white">
+                  {displayHunts.length} hunt{displayHunts.length === 1 ? '' : 's'}
+                </span>{' '}
+                available in {stateName}
+              </>
+            ) : (
+              <>No listings in {stateName} yet — be the first to add one.</>
+            )}
           </p>
         </div>
       </div>
@@ -109,11 +118,28 @@ export default async function StateHuntsPage({ params }: StatePageProps) {
         <h2 className="text-xl font-bold text-wht-forest mb-5">
           Available Hunts in {stateName}
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayHunts.map((hunt) => (
-            <HuntCard key={hunt.id} {...hunt} />
-          ))}
-        </div>
+        {displayHunts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayHunts.map((hunt) => (
+              <HuntCard key={hunt.id} {...hunt} />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl border border-wht-bone-2 p-10 text-center">
+            <p className="text-wht-ink font-heritage text-xl mb-2">
+              No hunts in {stateName} yet
+            </p>
+            <p className="text-wht-stone text-sm mb-6">
+              Outfitters are still being added to the platform. Browse all available hunts in the meantime.
+            </p>
+            <Link
+              href="/browse"
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-wht-blaze hover:bg-wht-blaze-2 text-white px-5 py-2.5 text-sm font-medium transition-colors"
+            >
+              Browse All Hunts
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   )

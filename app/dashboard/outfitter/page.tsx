@@ -25,13 +25,14 @@ export default async function OutfitterDashboardPage() {
   // Real stats: active listings + inquiries
   const activeListings = listings.filter((l) => l.is_active).length
 
-  const { count: inquiriesCount } = await supabase
-    .from('inquiries')
-    .select('*', { count: 'exact', head: true })
-    .in(
-      'listing_id',
-      listings.map((l) => l.id)
-    )
+  const listingIds = listings.map((l) => l.id)
+  const inquiriesCount = listingIds.length === 0
+    ? 0
+    : ((await supabase
+        .from('inquiries')
+        .select('*', { count: 'exact', head: true })
+        .in('hunt_id', listingIds)
+      ).count ?? 0)
 
   return (
     <OutfitterDashboardClient

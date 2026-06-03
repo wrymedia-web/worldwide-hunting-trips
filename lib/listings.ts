@@ -171,8 +171,10 @@ export async function getListingsBySpecies(speciesSlug: string): Promise<HuntCar
     // fall through to mock
   }
   const name = speciesSlug.replace(/-/g, ' ')
-  const matches = mockHunts.filter((h) => h.species.toLowerCase() === name.toLowerCase())
-  return matches.length > 0 ? matches : mockHunts.slice(0, 6)
+  // Only return examples that actually match the requested species — never fall
+  // back to unrelated mock hunts (that misled testers into thinking the page
+  // wasn't filtering).
+  return mockHunts.filter((h) => h.species.toLowerCase() === name.toLowerCase())
 }
 
 /** Active listings for a single state (matched by display name). Real data, else example fallback. */
@@ -191,8 +193,9 @@ export async function getListingsByState(stateName: string): Promise<HuntCardPro
   } catch {
     // fall through to mock
   }
-  const matches = mockHunts.filter((h) => h.state.toLowerCase() === stateName.toLowerCase())
-  return matches.length > 0 ? matches : mockHunts.slice(0, 6)
+  // Only return examples that actually live in the requested state — never fall
+  // back to unrelated mock hunts.
+  return mockHunts.filter((h) => h.state.toLowerCase() === stateName.toLowerCase())
 }
 
 // ─── Outfitter directory ────────────────────────────────────────────────────
