@@ -41,6 +41,7 @@ interface HuntListingFormProps {
   speciesOptions: SpeciesOption[]
   countries: CountryOption[]
   regions: RegionOption[]
+  extraSection?: React.ReactNode
   defaultValues?: Partial<{
     title: string
     species_id: string
@@ -82,6 +83,7 @@ export default function HuntListingForm({
   speciesOptions,
   countries,
   regions,
+  extraSection,
   defaultValues = {},
 }: HuntListingFormProps) {
   const router = useRouter()
@@ -115,18 +117,24 @@ export default function HuntListingForm({
 
     startTransition(async () => {
       if (mode === 'create') {
-        const { error: actionError } = await createHuntListing(formData, outfitterId)
+        const { listing, error: actionError } = await createHuntListing(formData, outfitterId)
         if (actionError) {
           setError(actionError)
           return
         }
-      } else {
-        if (!listingId) return
-        const { error: actionError } = await updateHuntListing(listingId, formData)
-        if (actionError) {
-          setError(actionError)
-          return
-        }
+        // Send the outfitter to the edit page so they can add photos.
+        router.push(
+          listing
+            ? `/dashboard/outfitter/listings/${listing.id}/edit?new=1`
+            : '/dashboard/outfitter'
+        )
+        return
+      }
+      if (!listingId) return
+      const { error: actionError } = await updateHuntListing(listingId, formData)
+      if (actionError) {
+        setError(actionError)
+        return
       }
       router.push('/dashboard/outfitter')
     })
@@ -555,6 +563,8 @@ export default function HuntListingForm({
               </div>
             </div>
           </div>
+
+          {extraSection}
 
           {/* ── Actions ───────────────────────────────────── */}
           <div className="flex items-center justify-between gap-4">

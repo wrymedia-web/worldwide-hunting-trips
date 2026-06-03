@@ -1,7 +1,9 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getOutfitterByUser } from '@/app/actions/outfitter'
+import { getHuntPhotos } from '@/app/actions/photos'
 import HuntListingForm from '@/components/hunt-listing-form'
+import HuntPhotoUploader from '@/components/hunt-photo-uploader'
 
 interface SpeciesRow {
   id: string
@@ -92,6 +94,8 @@ export default async function EditHuntListingPage({
     .select('id, name, country_id')
     .order('name')
 
+  const photos = await getHuntPhotos(id)
+
   return (
     <HuntListingForm
       mode="edit"
@@ -100,6 +104,7 @@ export default async function EditHuntListingPage({
       speciesOptions={speciesOptions}
       countries={countryRows ?? []}
       regions={regionRows ?? []}
+      extraSection={<HuntPhotoUploader listingId={id} initialPhotos={photos} />}
       defaultValues={{
         title: listing.title,
         species_id: listing.species_id ?? undefined,
