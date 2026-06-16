@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState, useTransition } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Loader2, Star, Trash2, UploadCloud, GripVertical, Image as ImageIcon } from 'lucide-react'
 import {
   uploadHuntPhotos,
@@ -24,6 +25,7 @@ export default function HuntPhotoUploader({
   listingId,
   initialPhotos,
 }: HuntPhotoUploaderProps) {
+  const router = useRouter()
   const [photos, setPhotos] = useState<HuntPhoto[]>(initialPhotos)
   const [error, setError] = useState<string | null>(null)
   const [isUploading, startUploadTransition] = useTransition()
@@ -61,16 +63,26 @@ export default function HuntPhotoUploader({
       for (const f of list) fd.append('files', f)
 
       startUploadTransition(async () => {
-        const { uploaded, error: actionErr } = await uploadHuntPhotos(listingId, fd)
-        if (actionErr) {
-          setError(`${actionErr}${uploaded > 0 ? ` (${uploaded} uploaded before the failure)` : ''}`)
+        try {
+          const { uploaded, error: actionErr } = await uploadHuntPhotos(listingId, fd)
+          if (actionErr) {
+            setError(`${actionErr}${uploaded > 0 ? ` (${uploaded} uploaded before the failure)` : ''}`)
+            if (uploaded > 0) router.refresh()
+            return
+          }
+          // Soft refresh — server revalidated the path, this re-runs the page
+          // server component and re-feeds initialPhotos. Form state is preserved.
+          router.refresh()
+        } catch (err) {
+          // Server actions can throw if the action chunk 404s (deployment skew,
+          // CDN cache mismatch). Surface that instead of leaving the user
+          // staring at a spinner.
+          const message = err instanceof Error ? err.message : 'Upload failed.'
+          setError(`${message} Try again — if it keeps happening, refresh the page.`)
         }
-        // Server revalidates; force a refresh by reloading photos via router action.
-        // Simpler: reload page section by re-fetching via a hard navigation reload.
-        window.location.reload()
       })
     },
-    [listingId, remaining]
+    [listingId, remaining, router]
   )
 
   const handleDelete = (photoId: string) => {

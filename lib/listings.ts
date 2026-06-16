@@ -510,7 +510,7 @@ export async function getListingDetailView(slug: string): Promise<HuntDetailView
     const { data: qaRows } = await supabase
       .from('listing_qa')
       .select('question_key, custom_question, answer, sort_order')
-      .eq('listing_id', row.id)
+      .eq('hunt_id', row.id)
       .order('sort_order')
     qa = (qaRows ?? [])
       .map((r: Record<string, unknown>) => ({

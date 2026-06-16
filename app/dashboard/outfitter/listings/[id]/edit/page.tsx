@@ -59,10 +59,14 @@ interface QaRow {
 
 export default async function EditHuntListingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ new?: string }>
 }) {
   const { id } = await params
+  const { new: newFlag } = await searchParams
+  const isNewListing = newFlag === '1'
   const supabase = await createClient()
 
   const {
@@ -118,7 +122,7 @@ export default async function EditHuntListingPage({
   const { data: qaRowsData } = await supabase
     .from('listing_qa')
     .select('question_key, custom_question, answer, sort_order')
-    .eq('listing_id', id)
+    .eq('hunt_id', id)
     .order('sort_order')
 
   const qaRows = (qaRowsData ?? []) as QaRow[]
@@ -132,6 +136,7 @@ export default async function EditHuntListingPage({
       countries={countryRows ?? []}
       regions={regionRows ?? []}
       extraSection={<HuntPhotoUploader listingId={id} initialPhotos={photos} />}
+      isNewListing={isNewListing}
       defaultValues={{
         title: listing.title,
         species_id: listing.species_id ?? undefined,

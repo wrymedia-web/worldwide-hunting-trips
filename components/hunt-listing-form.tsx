@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Loader2, Plus, X } from 'lucide-react'
+import { ArrowLeft, Loader2, Plus, X, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -54,6 +54,7 @@ interface HuntListingFormProps {
   countries: CountryOption[]
   regions: RegionOption[]
   extraSection?: React.ReactNode
+  isNewListing?: boolean
   defaultValues?: Partial<{
     title: string
     species_id: string
@@ -119,6 +120,7 @@ export default function HuntListingForm({
   countries,
   regions,
   extraSection,
+  isNewListing = false,
   defaultValues = {},
 }: HuntListingFormProps) {
   const router = useRouter()
@@ -126,6 +128,13 @@ export default function HuntListingForm({
   const [isDeleting, startDeleteTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const photosRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (isNewListing && photosRef.current) {
+      photosRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [isNewListing])
 
   const dv = defaultValues
   const groupedSpecies = groupSpecies(speciesOptions)
@@ -302,6 +311,18 @@ export default function HuntListingForm({
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8">
+        {isNewListing && (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 mb-6 flex items-start gap-3">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-emerald-900">
+              <p className="font-semibold">Listing published.</p>
+              <p className="mt-0.5">
+                Add photos in the Hunt Photos section below — your listing will look much sharper
+                on browse cards once it has at least one. All the form fields stay editable above.
+              </p>
+            </div>
+          </div>
+        )}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-6 text-sm text-red-700">
             {error}
@@ -830,7 +851,7 @@ export default function HuntListingForm({
             )}
           </Section>
 
-          {extraSection}
+          <div ref={photosRef}>{extraSection}</div>
 
           {/* ── Actions ───────────────────────────────────── */}
           <div className="flex items-center justify-between gap-4">
