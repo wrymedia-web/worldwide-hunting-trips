@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
+import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: {
@@ -17,15 +18,37 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  let role: 'hunter' | 'outfitter' | null = null
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle()
+    role = (profile?.role as 'hunter' | 'outfitter' | undefined) ?? null
+  }
+
+  const navUser = user
+    ? {
+        email: user.email ?? '',
+        dashboardHref: role === 'outfitter' ? '/dashboard/outfitter' : '/dashboard/hunter',
+      }
+    : null
+
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-wht-paper">
-        <Navbar />
+        <Navbar user={navUser} />
         <main className="flex-1">{children}</main>
         <Footer />
       </body>

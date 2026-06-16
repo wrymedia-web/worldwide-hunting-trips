@@ -36,6 +36,25 @@ interface HuntListingRow {
   is_draw: boolean
   is_otc: boolean
   is_active: boolean
+  fenced: boolean | null
+  hunting_styles: string[] | null
+  baited: boolean | null
+  difficulty: string | null
+  property_size_acres: number | null
+  season_dates_text: string | null
+  price_includes: string[] | null
+  price_excludes: string[] | null
+  deposit_terms: string | null
+  final_payment_terms: string | null
+  cancellation_terms: string | null
+  payment_methods: string[] | null
+}
+
+interface QaRow {
+  question_key: string | null
+  custom_question: string | null
+  answer: string
+  sort_order: number
 }
 
 export default async function EditHuntListingPage({
@@ -96,6 +115,14 @@ export default async function EditHuntListingPage({
 
   const photos = await getHuntPhotos(id)
 
+  const { data: qaRowsData } = await supabase
+    .from('listing_qa')
+    .select('question_key, custom_question, answer, sort_order')
+    .eq('listing_id', id)
+    .order('sort_order')
+
+  const qaRows = (qaRowsData ?? []) as QaRow[]
+
   return (
     <HuntListingForm
       mode="edit"
@@ -127,6 +154,19 @@ export default async function EditHuntListingPage({
         season_end: listing.season_end,
         is_draw: listing.is_draw,
         is_otc: listing.is_otc,
+        fenced: listing.fenced,
+        hunting_styles: listing.hunting_styles ?? [],
+        baited: listing.baited,
+        difficulty: listing.difficulty,
+        property_size_acres: listing.property_size_acres,
+        season_dates_text: listing.season_dates_text,
+        price_includes: listing.price_includes ?? [],
+        price_excludes: listing.price_excludes ?? [],
+        deposit_terms: listing.deposit_terms,
+        final_payment_terms: listing.final_payment_terms,
+        cancellation_terms: listing.cancellation_terms,
+        payment_methods: listing.payment_methods ?? [],
+        qa_rows: qaRows,
       }}
     />
   )

@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, LogOut, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { signOut } from '@/app/actions/auth'
 
 const navLinks = [
   { href: '/browse', label: 'Browse Hunts' },
@@ -14,7 +15,12 @@ const navLinks = [
   { href: '/about', label: 'About' },
 ]
 
-export function Navbar() {
+interface NavbarUser {
+  email: string
+  dashboardHref: string
+}
+
+export function Navbar({ user }: { user: NavbarUser | null }) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
@@ -47,16 +53,35 @@ export function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="outline-bone" size="sm">
-                Login
-              </Button>
-            </Link>
-            <Link href="/signup?type=outfitter">
-              <Button variant="default" size="sm">
-                List Your Hunt
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href={user.dashboardHref}>
+                  <Button variant="outline-bone" size="sm">
+                    <LayoutDashboard className="h-4 w-4 mr-1.5" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <form action={signOut}>
+                  <Button type="submit" variant="default" size="sm">
+                    <LogOut className="h-4 w-4 mr-1.5" />
+                    Sign Out
+                  </Button>
+                </form>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="outline-bone" size="sm">
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/signup?type=outfitter">
+                  <Button variant="default" size="sm">
+                    List Your Hunt
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Hamburger */}
@@ -85,16 +110,36 @@ export function Navbar() {
               </Link>
             ))}
             <div className="pt-3 flex flex-col gap-2 border-t border-wht-bone/20 mt-2">
-              <Link href="/login" onClick={() => setMobileOpen(false)}>
-                <Button variant="outline-bone" size="sm" className="w-full">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/signup?type=outfitter" onClick={() => setMobileOpen(false)}>
-                <Button variant="default" size="sm" className="w-full">
-                  List Your Hunt
-                </Button>
-              </Link>
+              {user ? (
+                <>
+                  <p className="px-3 text-xs text-wht-bone/60 truncate">{user.email}</p>
+                  <Link href={user.dashboardHref} onClick={() => setMobileOpen(false)}>
+                    <Button variant="outline-bone" size="sm" className="w-full">
+                      <LayoutDashboard className="h-4 w-4 mr-1.5" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <form action={signOut}>
+                    <Button type="submit" variant="default" size="sm" className="w-full">
+                      <LogOut className="h-4 w-4 mr-1.5" />
+                      Sign Out
+                    </Button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setMobileOpen(false)}>
+                    <Button variant="outline-bone" size="sm" className="w-full">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link href="/signup?type=outfitter" onClick={() => setMobileOpen(false)}>
+                    <Button variant="default" size="sm" className="w-full">
+                      List Your Hunt
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

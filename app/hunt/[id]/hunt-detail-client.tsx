@@ -13,8 +13,25 @@ import { LiabilityNotice } from '@/components/liability-notice'
 import { toggleSaveHunt } from '@/app/actions/hunter'
 import type { HuntDetailView } from '@/lib/listings'
 
-const TABS = ['Overview', 'Need to Know', 'Pricing', 'Reviews'] as const
+const TABS = ['Overview', 'Need to Know', 'Pricing', 'Q&A', 'Reviews'] as const
 type Tab = (typeof TABS)[number]
+
+function fenceLabel(v: boolean | null): string {
+  if (v === true) return 'High Fence'
+  if (v === false) return 'Free Range'
+  return '—'
+}
+
+function baitLabel(v: boolean | null): string {
+  if (v === true) return 'Baited'
+  if (v === false) return 'No Bait'
+  return '—'
+}
+
+function acresLabel(acres: number | null): string {
+  if (acres == null) return '—'
+  return `${acres.toLocaleString()} acres`
+}
 
 interface Props {
   hunt: HuntDetailView
@@ -190,9 +207,11 @@ export default function HuntDetailClient({ hunt, initiallySaved }: Props) {
                     {
                       icon: <Calendar className="h-5 w-5 text-wht-blaze" />,
                       label: 'Season Dates',
-                      value: hunt.seasonStart && hunt.seasonEnd
-                        ? `${hunt.seasonStart} – ${hunt.seasonEnd}`
-                        : 'Contact outfitter',
+                      value:
+                        hunt.seasonDatesText ??
+                        (hunt.seasonStart && hunt.seasonEnd
+                          ? `${hunt.seasonStart} – ${hunt.seasonEnd}`
+                          : 'Contact outfitter'),
                     },
                     {
                       icon: <Crosshair className="h-5 w-5 text-wht-blaze" />,
@@ -208,6 +227,31 @@ export default function HuntDetailClient({ hunt, initiallySaved }: Props) {
                       icon: <Users className="h-5 w-5 text-wht-blaze" />,
                       label: 'Guide Type',
                       value: hunt.guideType,
+                    },
+                    {
+                      icon: <Mountain className="h-5 w-5 text-wht-blaze" />,
+                      label: 'Free Range / High Fence',
+                      value: fenceLabel(hunt.fenced),
+                    },
+                    {
+                      icon: <Crosshair className="h-5 w-5 text-wht-blaze" />,
+                      label: 'Baiting',
+                      value: baitLabel(hunt.baited),
+                    },
+                    {
+                      icon: <Mountain className="h-5 w-5 text-wht-blaze" />,
+                      label: 'Difficulty',
+                      value: hunt.difficulty ?? '—',
+                    },
+                    {
+                      icon: <Mountain className="h-5 w-5 text-wht-blaze" />,
+                      label: 'Property Size',
+                      value: acresLabel(hunt.propertySizeAcres),
+                    },
+                    {
+                      icon: <Crosshair className="h-5 w-5 text-wht-blaze" />,
+                      label: 'Hunting Style',
+                      value: hunt.huntingStyles.length > 0 ? hunt.huntingStyles.join(', ') : '—',
                     },
                   ].map((item, i) => (
                     <div key={i} className="bg-white rounded-xl p-4 border border-wht-bone-2 flex gap-3 items-start">
@@ -251,12 +295,62 @@ export default function HuntDetailClient({ hunt, initiallySaved }: Props) {
                     </ul>
                   </div>
                 </div>
-                <div className="bg-wht-paper rounded-xl border border-wht-bone-2 p-5">
-                  <h3 className="text-base font-heritage text-wht-ink mb-2">Payment &amp; Cancellation</h3>
-                  <p className="text-sm text-wht-stone font-body leading-relaxed">
-                    Payment terms, deposits, and cancellation policies are arranged directly with the outfitter.
-                  </p>
+                <div className="bg-wht-paper rounded-xl border border-wht-bone-2 p-5 space-y-4">
+                  <h3 className="text-base font-heritage text-wht-ink">Payment &amp; Cancellation</h3>
+                  {hunt.depositTerms ? (
+                    <div>
+                      <div className="text-xs text-wht-fog font-mono uppercase tracking-wider mb-1">Deposit</div>
+                      <p className="text-sm text-wht-stone font-body leading-relaxed whitespace-pre-line">{hunt.depositTerms}</p>
+                    </div>
+                  ) : null}
+                  {hunt.finalPaymentTerms ? (
+                    <div>
+                      <div className="text-xs text-wht-fog font-mono uppercase tracking-wider mb-1">Final Payment</div>
+                      <p className="text-sm text-wht-stone font-body leading-relaxed whitespace-pre-line">{hunt.finalPaymentTerms}</p>
+                    </div>
+                  ) : null}
+                  {hunt.cancellationTerms ? (
+                    <div>
+                      <div className="text-xs text-wht-fog font-mono uppercase tracking-wider mb-1">Cancellation Policy</div>
+                      <p className="text-sm text-wht-stone font-body leading-relaxed whitespace-pre-line">{hunt.cancellationTerms}</p>
+                    </div>
+                  ) : null}
+                  {hunt.paymentMethods.length > 0 ? (
+                    <div>
+                      <div className="text-xs text-wht-fog font-mono uppercase tracking-wider mb-1">Accepted Payment Methods</div>
+                      <p className="text-sm text-wht-stone font-body">{hunt.paymentMethods.join(', ')}</p>
+                    </div>
+                  ) : null}
+                  {!hunt.depositTerms &&
+                    !hunt.finalPaymentTerms &&
+                    !hunt.cancellationTerms &&
+                    hunt.paymentMethods.length === 0 && (
+                      <p className="text-sm text-wht-stone font-body leading-relaxed">
+                        Payment terms, deposits, and cancellation policies are arranged directly with the outfitter.
+                      </p>
+                    )}
                 </div>
+              </div>
+            )}
+
+            {/* Q&A */}
+            {activeTab === 'Q&A' && (
+              <div className="space-y-4">
+                {hunt.qa.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Mail className="h-10 w-10 text-wht-bone-2 mx-auto mb-3" />
+                    <p className="text-wht-stone font-body text-sm">
+                      No Q&amp;A added yet — contact the outfitter directly with any questions.
+                    </p>
+                  </div>
+                ) : (
+                  hunt.qa.map((item, i) => (
+                    <div key={i} className="bg-white rounded-xl p-5 border border-wht-bone-2">
+                      <div className="text-sm font-semibold text-wht-ink font-body mb-2">{item.question}</div>
+                      <p className="text-sm text-wht-stone font-body leading-relaxed whitespace-pre-line">{item.answer}</p>
+                    </div>
+                  ))
+                )}
               </div>
             )}
 

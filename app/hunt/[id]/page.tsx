@@ -49,6 +49,17 @@ function mockToDetailView(slug: string): HuntDetailView {
     reviews: [],
     dangerousGame: false,
     isExample: true,
+    fenced: null,
+    huntingStyles: [],
+    baited: null,
+    difficulty: null,
+    propertySizeAcres: null,
+    seasonDatesText: null,
+    depositTerms: null,
+    finalPaymentTerms: null,
+    cancellationTerms: null,
+    paymentMethods: [],
+    qa: [],
   }
 }
 

@@ -2,6 +2,13 @@ import { createClient } from '@/lib/supabase/server'
 import type { HuntCardProps } from '@/components/hunt-card'
 import type { OutfitterCardProps } from '@/components/outfitter-card'
 import { mockHunts, mockOutfitters } from '@/lib/mock-data'
+import {
+  HUNTING_STYLES,
+  DIFFICULTY_LEVELS,
+  PRICE_INCLUDES_OPTIONS,
+  PAYMENT_METHODS,
+  QA_QUESTIONS,
+} from '@/lib/constants'
 
 // Public read layer for hunt listings. Falls back to the example/mock data when the
 // database has no active listings yet, so the live site never renders empty while
@@ -111,6 +118,18 @@ export type ListingDetail = ListingRow & {
   is_draw: boolean | null
   is_otc: boolean | null
   outfitter_id: string
+  fenced: boolean | null
+  hunting_styles: string[] | null
+  baited: boolean | null
+  difficulty: string | null
+  property_size_acres: number | null
+  season_dates_text: string | null
+  price_includes: string[] | null
+  price_excludes: string[] | null
+  deposit_terms: string | null
+  final_payment_terms: string | null
+  cancellation_terms: string | null
+  payment_methods: string[] | null
 }
 
 /** Full listing for the hunt detail page, looked up by slug. Null if not found (caller falls back). */
@@ -356,6 +375,11 @@ export interface HuntReview {
   text: string
 }
 
+export interface HuntQa {
+  question: string
+  answer: string
+}
+
 export interface HuntDetailView {
   slug: string
   huntId: string | null
@@ -387,7 +411,27 @@ export interface HuntDetailView {
   reviews: HuntReview[]
   dangerousGame: boolean
   isExample: boolean
+  // Spec-doc fields (migration 007)
+  fenced: boolean | null
+  huntingStyles: string[]
+  baited: boolean | null
+  difficulty: string | null
+  propertySizeAcres: number | null
+  seasonDatesText: string | null
+  depositTerms: string | null
+  finalPaymentTerms: string | null
+  cancellationTerms: string | null
+  paymentMethods: string[]
+  qa: HuntQa[]
 }
+
+const HUNTING_STYLE_LABEL = Object.fromEntries(HUNTING_STYLES.map((s) => [s.value, s.label]))
+const DIFFICULTY_LABEL = Object.fromEntries(DIFFICULTY_LEVELS.map((d) => [d.value, d.label]))
+const PRICE_INCLUDES_LABEL = Object.fromEntries(
+  PRICE_INCLUDES_OPTIONS.map((o) => [o.value, o.label])
+)
+const PAYMENT_METHOD_LABEL = Object.fromEntries(PAYMENT_METHODS.map((p) => [p.value, p.label]))
+const QA_QUESTION_LABEL = Object.fromEntries(QA_QUESTIONS.map((q) => [q.key, q.question]))
 
 function guideLabel(value: string): string {
   switch (value) {
@@ -414,12 +458,33 @@ export async function getListingDetailView(slug: string): Promise<HuntDetailView
   const { rating, reviewCount } = ratingStats(row.reviews)
   const guided = guideLabel(row.guided_type ?? 'fully_guided')
 
-  const priceIncludes: string[] = [guided]
-  if (row.lodging_included) priceIncludes.push('Lodging')
-  if (row.meals_included) priceIncludes.push('Meals')
-  priceIncludes.push('Field Dressing')
+  // Price includes: prefer the outfitter's explicit selections; fall back to legacy fields.
+  const priceIncludes: string[] =
+    row.price_includes && row.price_includes.length > 0
+      ? row.price_includes.map((v) => PRICE_INCLUDES_LABEL[v] ?? v)
+      : (() => {
+          const fallback = [guided]
+          if (row.lodging_included) fallback.push('Lodging')
+          if (row.meals_included) fallback.push('Meals')
+          fallback.push('Field Dressing')
+          return fallback
+        })()
+
+  const priceExcludes: string[] =
+    row.price_excludes && row.price_excludes.length > 0
+      ? row.price_excludes.map((v) => PRICE_INCLUDES_LABEL[v] ?? v)
+      : ['Tags / Licenses', 'Travel & Airfare', 'Gratuities', 'Taxidermy']
+
+  const huntingStyles: string[] = (row.hunting_styles ?? []).map(
+    (v) => HUNTING_STYLE_LABEL[v] ?? v
+  )
+
+  const paymentMethods: string[] = (row.payment_methods ?? []).map(
+    (v) => PAYMENT_METHOD_LABEL[v] ?? v
+  )
 
   let reviews: HuntReview[] = []
+  let qa: HuntQa[] = []
   try {
     const supabase = await createClient()
     const { data: reviewRows } = await supabase
@@ -441,8 +506,24 @@ export async function getListingDetailView(slug: string): Promise<HuntDetailView
         text: (r.body as string) ?? '',
       }
     })
+
+    const { data: qaRows } = await supabase
+      .from('listing_qa')
+      .select('question_key, custom_question, answer, sort_order')
+      .eq('listing_id', row.id)
+      .order('sort_order')
+    qa = (qaRows ?? [])
+      .map((r: Record<string, unknown>) => ({
+        question:
+          (r.custom_question as string) ??
+          (r.question_key ? QA_QUESTION_LABEL[r.question_key as string] : '') ??
+          '',
+        answer: (r.answer as string) ?? '',
+      }))
+      .filter((q) => q.question && q.answer)
   } catch {
     reviews = []
+    qa = []
   }
 
   return {
@@ -472,10 +553,21 @@ export async function getListingDetailView(slug: string): Promise<HuntDetailView
     description: row.description ?? '',
     imageUrl: primaryImage(row.hunt_images),
     priceIncludes,
-    priceExcludes: ['Tags / Licenses', 'Travel & Airfare', 'Gratuities', 'Taxidermy'],
+    priceExcludes,
     reviews,
     dangerousGame: row.species?.category === 'dangerous_game',
     isExample: false,
+    fenced: row.fenced,
+    huntingStyles,
+    baited: row.baited,
+    difficulty: row.difficulty ? DIFFICULTY_LABEL[row.difficulty] ?? row.difficulty : null,
+    propertySizeAcres: row.property_size_acres,
+    seasonDatesText: row.season_dates_text,
+    depositTerms: row.deposit_terms,
+    finalPaymentTerms: row.final_payment_terms,
+    cancellationTerms: row.cancellation_terms,
+    paymentMethods,
+    qa,
   }
 }
 
