@@ -26,9 +26,19 @@ type ListingRow = {
   price_type: string | null
   weapon_types: string[] | null
   lodging_included: boolean | null
+  meals_included: boolean | null
   guided_type: string | null
   is_active: boolean
   created_at: string
+  duration_days: number | string | null
+  hunting_styles: string[] | null
+  difficulty: string | null
+  property_size_acres: number | string | null
+  fenced: boolean | null
+  baited: boolean | null
+  is_otc: boolean | null
+  is_draw: boolean | null
+  special_deal: string | null
   outfitters: { business_name: string; slug: string } | null
   species: { name: string; category: string } | null
   hunt_images: ImageRow[] | null
@@ -43,7 +53,23 @@ function guideType(value: string | null): HuntCardProps['guideType'] {
 }
 
 function priceType(value: string | null): HuntCardProps['priceType'] {
-  return value === 'per_day' || value === 'flat' ? value : 'per_person'
+  if (value === 'per_day') return 'per_day'
+  // Form saves 'flat_rate' (see PRICE_TYPES in constants); older/legacy rows
+  // may still say 'flat'. Both mean the same public label.
+  if (value === 'flat' || value === 'flat_rate') return 'flat'
+  return 'per_person'
+}
+
+// Supabase/postgrest can serialize int columns as strings under some configs;
+// callers rely on numeric-or-null so we coerce here rather than at every use.
+function coerceInt(value: unknown): number | null {
+  if (value == null) return null
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null
+  if (typeof value === 'string' && value.trim() !== '') {
+    const n = parseInt(value, 10)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
 }
 
 function primaryImage(images: ImageRow[] | null): string | undefined {
@@ -63,6 +89,11 @@ function ratingStats(reviews: ReviewRow[] | null): { rating: number; reviewCount
   return { rating: Math.round(avg * 10) / 10, reviewCount: vals.length }
 }
 
+function specialDealValue(value: string | null): HuntCardProps['specialDeal'] {
+  if (value === 'last_minute' || value === 'cancellation' || value === 'show_special') return value
+  return null
+}
+
 export function mapListingToCard(row: ListingRow): HuntCardProps {
   const { rating, reviewCount } = ratingStats(row.reviews)
   return {
@@ -80,6 +111,16 @@ export function mapListingToCard(row: ListingRow): HuntCardProps {
     guideType: guideType(row.guided_type),
     priceType: priceType(row.price_type),
     isExample: false,
+    durationDays: coerceInt(row.duration_days),
+    huntingStyles: row.hunting_styles ?? [],
+    difficulty: row.difficulty,
+    propertySizeAcres: coerceInt(row.property_size_acres),
+    mealsIncluded: row.meals_included ?? false,
+    baited: row.baited,
+    fenced: row.fenced,
+    isOtc: row.is_otc ?? false,
+    isDraw: row.is_draw ?? false,
+    specialDeal: specialDealValue(row.special_deal),
   }
 }
 
@@ -162,6 +203,52 @@ export async function hasRealListings(): Promise<boolean> {
     return (count ?? 0) > 0
   } catch {
     return false
+  }
+}
+
+/** Active listings tagged with a Deals & Specials value, for the homepage strip. */
+export interface DealHunt {
+  id: string
+  title: string
+  outfitterName: string
+  species: string
+  state: string
+  pricePerPerson: number
+  originalPrice: number | null
+  badge: string
+  imageUrl?: string
+}
+
+const DEAL_BADGE_LABEL: Record<string, string> = {
+  last_minute: 'Last-Minute Deal',
+  cancellation: 'Cancellation',
+  show_special: 'Show Special',
+}
+
+export async function getDealHunts(limit = 3): Promise<DealHunt[]> {
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('hunt_listings')
+      .select(LISTING_SELECT + ', original_price, special_deal')
+      .eq('is_active', true)
+      .not('special_deal', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+    if (!data || data.length === 0) return []
+    return (data as unknown as (ListingRow & { original_price: number | string | null; special_deal: string | null })[]).map((row) => ({
+      id: row.slug,
+      title: row.title,
+      outfitterName: row.outfitters?.business_name ?? 'Outfitter',
+      species: row.species?.name ?? 'Various',
+      state: row.state,
+      pricePerPerson: row.price_per_person,
+      originalPrice: coerceInt(row.original_price),
+      badge: DEAL_BADGE_LABEL[row.special_deal ?? ''] ?? 'Special',
+      imageUrl: primaryImage(row.hunt_images),
+    }))
+  } catch {
+    return []
   }
 }
 
@@ -543,9 +630,9 @@ export async function getListingDetailView(slug: string): Promise<HuntDetailView
     lodgingIncluded: row.lodging_included ?? false,
     mealsIncluded: row.meals_included ?? false,
     guideType: guided,
-    duration: row.duration_days,
-    maxHunters: row.max_hunters,
-    successRate: row.success_rate,
+    duration: coerceInt(row.duration_days),
+    maxHunters: coerceInt(row.max_hunters),
+    successRate: coerceInt(row.success_rate),
     seasonStart: row.season_start,
     seasonEnd: row.season_end,
     landType: landTypeLabel(row.land_type),
@@ -561,7 +648,7 @@ export async function getListingDetailView(slug: string): Promise<HuntDetailView
     huntingStyles,
     baited: row.baited,
     difficulty: row.difficulty ? DIFFICULTY_LABEL[row.difficulty] ?? row.difficulty : null,
-    propertySizeAcres: row.property_size_acres,
+    propertySizeAcres: coerceInt(row.property_size_acres),
     seasonDatesText: row.season_dates_text,
     depositTerms: row.deposit_terms,
     finalPaymentTerms: row.final_payment_terms,

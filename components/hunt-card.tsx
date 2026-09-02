@@ -18,6 +18,18 @@ export interface HuntCardProps {
   guideType: 'fully_guided' | 'semi_guided' | 'self_guided'
   priceType?: 'per_person' | 'per_day' | 'flat'
   isExample?: boolean
+  // Filterable fields the /browse sidebar can key off; not rendered on the card
+  // itself. Undefined = unknown / not filterable for that hunt.
+  durationDays?: number | null
+  huntingStyles?: string[]
+  difficulty?: string | null
+  propertySizeAcres?: number | null
+  mealsIncluded?: boolean
+  baited?: boolean | null
+  fenced?: boolean | null
+  isOtc?: boolean
+  isDraw?: boolean
+  specialDeal?: 'last_minute' | 'cancellation' | 'show_special' | null
 }
 
 function getGuideLabel(type: HuntCardProps['guideType']) {

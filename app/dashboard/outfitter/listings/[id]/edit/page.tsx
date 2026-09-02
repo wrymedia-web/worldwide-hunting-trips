@@ -48,6 +48,8 @@ interface HuntListingRow {
   final_payment_terms: string | null
   cancellation_terms: string | null
   payment_methods: string[] | null
+  special_deal: string | null
+  original_price: number | null
 }
 
 interface QaRow {
@@ -135,7 +137,16 @@ export default async function EditHuntListingPage({
       speciesOptions={speciesOptions}
       countries={countryRows ?? []}
       regions={regionRows ?? []}
-      extraSection={<HuntPhotoUploader listingId={id} initialPhotos={photos} />}
+      extraSection={
+        <HuntPhotoUploader
+          // Keying on the current photo set forces a fresh mount after
+          // router.refresh() so useState re-seeds with the newly uploaded
+          // rows (parent-owned reset, avoids setState-in-render lint).
+          key={`${photos.length}-${photos.map((p) => p.id).join('-')}`}
+          listingId={id}
+          initialPhotos={photos}
+        />
+      }
       isNewListing={isNewListing}
       defaultValues={{
         title: listing.title,
@@ -172,6 +183,8 @@ export default async function EditHuntListingPage({
         cancellation_terms: listing.cancellation_terms,
         payment_methods: listing.payment_methods ?? [],
         qa_rows: qaRows,
+        special_deal: listing.special_deal,
+        original_price: listing.original_price,
       }}
     />
   )

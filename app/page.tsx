@@ -3,9 +3,23 @@ import { ArrowRight, CheckCircle, MessageSquare, DollarSign, Search, Star, Tag, 
 import { Button } from '@/components/ui/button'
 import { HuntCard } from '@/components/hunt-card'
 import { SearchBar } from '@/components/search-bar'
-import { getActiveListings, getActiveCountries } from '@/lib/listings'
+import { getActiveListings, getActiveCountries, getDealHunts } from '@/lib/listings'
 
-const dealHunts = [
+interface HomepageDeal {
+  id: string
+  title: string
+  outfitterName: string
+  species: string
+  state: string
+  pricePerPerson: number
+  originalPrice: number | null
+  badge: string
+}
+
+// Fallback deals surfaced only when no live outfitter has tagged a listing
+// as a special. Marked `isExample` so we can visually distinguish them once
+// the site is populated with real deals.
+const exampleDealHunts: (HomepageDeal & { isExample: true })[] = [
   {
     id: 'last-minute-whitetail-kansas',
     title: 'Last-Minute Whitetail — Nov 28–Dec 2',
@@ -13,13 +27,9 @@ const dealHunts = [
     species: 'Whitetail Deer',
     state: 'Kansas',
     pricePerPerson: 1100,
-    rating: 4.8,
-    reviewCount: 22,
-    weaponTypes: ['Rifle', 'Bow'],
-    lodgingIncluded: true,
-    guideType: 'fully_guided' as const,
-    badge: 'Last-Minute Deal',
     originalPrice: 1800,
+    badge: 'Last-Minute Deal',
+    isExample: true,
   },
   {
     id: 'cancellation-elk-colorado',
@@ -28,13 +38,9 @@ const dealHunts = [
     species: 'Elk',
     state: 'Colorado',
     pricePerPerson: 3200,
-    rating: 4.9,
-    reviewCount: 41,
-    weaponTypes: ['Rifle'],
-    lodgingIncluded: true,
-    guideType: 'fully_guided' as const,
-    badge: 'Cancellation',
     originalPrice: 4500,
+    badge: 'Cancellation',
+    isExample: true,
   },
   {
     id: 'show-special-turkey-missouri',
@@ -43,13 +49,9 @@ const dealHunts = [
     species: 'Turkey',
     state: 'Missouri',
     pricePerPerson: 595,
-    rating: 4.7,
-    reviewCount: 18,
-    weaponTypes: ['Bow', 'Shotgun'],
-    lodgingIncluded: false,
-    guideType: 'fully_guided' as const,
-    badge: 'Show Special',
     originalPrice: 850,
+    badge: 'Show Special',
+    isExample: true,
   },
 ]
 
@@ -106,8 +108,14 @@ const howItWorks = [
 ]
 
 export default async function HomePage() {
-  const [featured, countries] = await Promise.all([getActiveListings(), getActiveCountries()])
+  const [featured, countries, liveDeals] = await Promise.all([
+    getActiveListings(),
+    getActiveCountries(),
+    getDealHunts(3),
+  ])
   const featuredHunts = featured.slice(0, 6)
+  const dealHunts: (HomepageDeal & { isExample?: boolean })[] =
+    liveDeals.length > 0 ? liveDeals : exampleDealHunts
 
   return (
     <div className="min-h-screen">
@@ -224,6 +232,13 @@ export default async function HomePage() {
                       {deal.badge}
                     </span>
                   </div>
+                  {deal.isExample && (
+                    <div className="absolute top-3 right-3">
+                      <span className="inline-flex items-center rounded-full bg-amber-400 px-2.5 py-1 text-xs font-bold text-amber-900 uppercase tracking-wide shadow">
+                        Example
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-4">
                   <h3 className="font-semibold text-wht-ink text-sm leading-tight mb-1 group-hover:text-wht-forest transition-colors">{deal.title}</h3>
@@ -232,7 +247,9 @@ export default async function HomePage() {
                     <div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-xl font-display text-wht-blaze">${deal.pricePerPerson.toLocaleString()}</span>
-                        <span className="text-sm text-wht-stone line-through font-mono">${deal.originalPrice.toLocaleString()}</span>
+                        {deal.originalPrice != null && deal.originalPrice > deal.pricePerPerson && (
+                          <span className="text-sm text-wht-stone line-through font-mono">${deal.originalPrice.toLocaleString()}</span>
+                        )}
                       </div>
                       <span className="text-xs text-wht-stone">per person</span>
                     </div>

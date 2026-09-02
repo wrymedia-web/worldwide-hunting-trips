@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getOutfitterByUser, getOutfitterListings } from '@/app/actions/outfitter'
+import { getOutfitterInquiries } from '@/app/actions/outfitter-inquiries'
 import OutfitterDashboardClient from './dashboard-client'
 
 export default async function OutfitterDashboardPage() {
@@ -20,27 +21,21 @@ export default async function OutfitterDashboardPage() {
     redirect('/dashboard/outfitter/setup')
   }
 
-  const listings = await getOutfitterListings(outfitter.id)
+  const [listings, inquiries] = await Promise.all([
+    getOutfitterListings(outfitter.id),
+    getOutfitterInquiries(),
+  ])
 
-  // Real stats: active listings + inquiries
   const activeListings = listings.filter((l) => l.is_active).length
-
-  const listingIds = listings.map((l) => l.id)
-  const inquiriesCount = listingIds.length === 0
-    ? 0
-    : ((await supabase
-        .from('inquiries')
-        .select('*', { count: 'exact', head: true })
-        .in('hunt_id', listingIds)
-      ).count ?? 0)
 
   return (
     <OutfitterDashboardClient
       outfitter={outfitter}
       listings={listings}
+      inquiries={inquiries}
       stats={{
         activeListings,
-        totalInquiries: inquiriesCount ?? 0,
+        totalInquiries: inquiries.length,
       }}
     />
   )

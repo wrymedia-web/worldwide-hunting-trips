@@ -6,6 +6,7 @@ import { SlidersHorizontal } from 'lucide-react'
 import { HuntCard, type HuntCardProps } from '@/components/hunt-card'
 import { Select } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { US_STATES } from '@/lib/constants'
 
 const SPECIES = [
   'Whitetail Deer', 'Mule Deer', 'Elk', 'Moose', 'Black Bear', 'Brown Bear',
@@ -15,16 +16,28 @@ const SPECIES = [
   'Red Stag', 'Turkey', 'Alligator', 'Wolf', 'Buffalo', 'Exotic Game', 'Predator',
 ]
 
-const STATES = [
-  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
-  'Idaho', 'Kansas', 'Missouri', 'Montana', 'New Mexico', 'Oregon',
-  'Texas', 'Utah', 'Wyoming',
-]
+const STATES = [...US_STATES]
 
 const WEAPON_TYPES = ['Rifle', 'Muzzleloader', 'Bow', 'Crossbow', 'Shotgun']
 const HUNTING_STYLES = ['Spot & Stalk', 'Blind', 'Tree Stand', 'Driven', 'Hounds']
-const DIFFICULTY_OPTIONS = ['Easy', 'Moderate', 'Hard']
+const DIFFICULTY_OPTIONS = ['Easy', 'Medium', 'Hard']
 const GUIDE_OPTIONS = ['Fully Guided', 'Semi-Guided', 'Self-Guided']
+
+// Browse UI hunting-style labels → the value stored on a hunt (from constants).
+const HUNTING_STYLE_VALUE: Record<string, string> = {
+  'Spot & Stalk': 'spot_and_stalk',
+  'Blind': 'blind',
+  'Tree Stand': 'tree_stand',
+  'Driven': 'driven',
+  'Hounds': 'hounds',
+}
+
+// Difficulty label → stored value
+const DIFFICULTY_VALUE: Record<string, string> = {
+  Easy: 'easy',
+  Medium: 'medium',
+  Hard: 'hard',
+}
 
 // Map the homepage search bar's price-range keys to an upper bound (per person).
 const PRICE_RANGE_MAX: Record<string, number> = {
@@ -171,16 +184,52 @@ function BrowseContent({ hunts }: { hunts: HuntCardProps[] }) {
   + filters.weapons.length + filters.styles.length + filters.difficulty.length + filters.guideType.length
   + [filters.lodging, filters.meals, filters.baited, filters.fenced, filters.guaranteedTags, filters.nonHunting].filter(Boolean).length
 
-  // Only fields present on the hunt records are enforced; the rest stay no-ops
-  // until listings carry that data (days, property size, style, difficulty, etc.).
+  // A hunt is skipped by a specific filter if that filter is engaged AND the
+  // hunt either mismatches or lacks the data. Filters against fields the hunt
+  // record doesn't carry (undefined) treat "unknown" as "does not match" — we
+  // don't want to surface data we can't confirm.
   const results = useMemo(() => {
+    const daysMin = filters.daysMin ? Number(filters.daysMin) : null
+    const daysMax = filters.daysMax ? Number(filters.daysMax) : null
+    const acresMin = filters.propertySizeMin ? Number(filters.propertySizeMin) : null
+    const acresMax = filters.propertySizeMax ? Number(filters.propertySizeMax) : null
+
     const filtered = hunts.filter((h) => {
       if (filters.species && h.species !== filters.species) return false
       if (filters.state && h.state !== filters.state) return false
       if (filters.maxPrice && h.pricePerPerson > Number(filters.maxPrice)) return false
       if (filters.weapons.length && !filters.weapons.some((w) => h.weaponTypes?.includes(w))) return false
       if (filters.guideType.length && !filters.guideType.some((g) => GUIDE_TYPE_VALUE[g] === h.guideType)) return false
+
+      if (daysMin != null) {
+        if (h.durationDays == null || h.durationDays < daysMin) return false
+      }
+      if (daysMax != null) {
+        if (h.durationDays == null || h.durationDays > daysMax) return false
+      }
+      if (acresMin != null) {
+        if (h.propertySizeAcres == null || h.propertySizeAcres < acresMin) return false
+      }
+      if (acresMax != null) {
+        if (h.propertySizeAcres == null || h.propertySizeAcres > acresMax) return false
+      }
+      if (filters.styles.length) {
+        const wanted = filters.styles.map((s) => HUNTING_STYLE_VALUE[s] ?? s)
+        if (!wanted.some((v) => h.huntingStyles?.includes(v))) return false
+      }
+      if (filters.difficulty.length) {
+        const wanted = filters.difficulty.map((d) => DIFFICULTY_VALUE[d] ?? d)
+        if (!h.difficulty || !wanted.includes(h.difficulty)) return false
+      }
+
       if (filters.lodging && !h.lodgingIncluded) return false
+      if (filters.meals && !h.mealsIncluded) return false
+      if (filters.baited && h.baited !== true) return false
+      if (filters.fenced && h.fenced !== true) return false
+      // "Guaranteed Tags" ≈ Over-The-Counter (no draw required).
+      if (filters.guaranteedTags && h.isOtc !== true) return false
+      // "Non-Hunting Activities" has no dedicated field yet; leave as a no-op
+      // rather than silently drop every hunt while we wait for that data.
       return true
     })
     return sortHunts(filtered, sort)

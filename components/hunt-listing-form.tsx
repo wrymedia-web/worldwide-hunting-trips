@@ -18,6 +18,7 @@ import {
   PRICE_INCLUDES_OPTIONS,
   PAYMENT_METHODS,
   QA_QUESTIONS,
+  SPECIAL_DEAL_OPTIONS,
 } from '@/lib/constants'
 import { createHuntListing, updateHuntListing, deleteHuntListing } from '@/app/actions/outfitter'
 
@@ -94,6 +95,9 @@ interface HuntListingFormProps {
     payment_methods: string[] | null
     // Q&A
     qa_rows: QaDraftRow[]
+    // Deals & Specials
+    special_deal: string | null
+    original_price: number | null
   }>
 }
 
@@ -127,8 +131,15 @@ export default function HuntListingForm({
   const [isPending, startTransition] = useTransition()
   const [isDeleting, startDeleteTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const photosRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!saved) return
+    const t = setTimeout(() => setSaved(false), 4000)
+    return () => clearTimeout(t)
+  }, [saved])
 
   useEffect(() => {
     if (isNewListing && photosRef.current) {
@@ -245,7 +256,9 @@ export default function HuntListingForm({
         return
       }
       clearDraft()
-      router.push('/dashboard/outfitter')
+      setSaved(true)
+      router.refresh()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     })
   }
 
@@ -326,6 +339,15 @@ export default function HuntListingForm({
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-6 text-sm text-red-700">
             {error}
+          </div>
+        )}
+        {saved && !isNewListing && (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 mb-6 flex items-start gap-3">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-emerald-900">
+              <p className="font-semibold">Changes saved.</p>
+              <p className="mt-0.5">Your listing has been updated.</p>
+            </div>
           </div>
         )}
 
@@ -483,6 +505,36 @@ export default function HuntListingForm({
                 placeholder="4"
                 defaultValue={dv.max_hunters ?? ''}
                 className="max-w-[200px]"
+              />
+            </div>
+          </Section>
+
+          {/* ── Deals & Specials ─────────────────────────── */}
+          <Section title="Deals & Specials (Optional)">
+            <p className="text-sm text-gray-600 mb-2">
+              Flagging a listing here surfaces it in the Deals &amp; Specials
+              section on the homepage. Leave blank for a normal listing.
+            </p>
+            <div>
+              <Label>Deal Type</Label>
+              <RadioRow
+                name="special_deal"
+                options={SPECIAL_DEAL_OPTIONS}
+                defaultValue={dv.special_deal ?? ''}
+                includeNone
+              />
+            </div>
+            <div className="max-w-[240px]">
+              <Label>
+                Original Price <span className="text-gray-400 font-normal">(shows as strikethrough)</span>
+              </Label>
+              <Input
+                name="original_price"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="e.g. 3500"
+                defaultValue={dv.original_price ?? ''}
               />
             </div>
           </Section>

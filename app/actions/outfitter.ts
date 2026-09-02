@@ -60,6 +60,9 @@ export interface HuntListingRecord {
   final_payment_terms: string | null
   cancellation_terms: string | null
   payment_methods: string[] | null
+  // Deals & Specials
+  special_deal: string | null
+  original_price: number | null
 }
 
 export interface ListingQaRow {
@@ -155,6 +158,12 @@ function extractListingPayload(formData: FormData) {
     final_payment_terms: strOrNull(formData.get('final_payment_terms')),
     cancellation_terms: strOrNull(formData.get('cancellation_terms')),
     payment_methods: paymentMethods.length ? paymentMethods : null,
+    // Deals & Specials
+    special_deal: (() => {
+      const v = strOrNull(formData.get('special_deal'))
+      return v === 'last_minute' || v === 'cancellation' || v === 'show_special' ? v : null
+    })(),
+    original_price: intOrNull(formData.get('original_price')),
   }
 }
 
@@ -243,6 +252,51 @@ export async function createOutfitterProfile(formData: FormData): Promise<{
     return { outfitter: null, error: error.message }
   }
 
+  return { outfitter: data as OutfitterRecord, error: null }
+}
+
+// ─── updateOutfitterProfile ───────────────────────────────────────────────────
+
+export async function updateOutfitterProfile(formData: FormData): Promise<{
+  outfitter: OutfitterRecord | null
+  error: string | null
+}> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+
+  if (authError || !user) return { outfitter: null, error: 'Not authenticated' }
+
+  const existing = await getOutfitterByUser(user.id)
+  if (!existing) return { outfitter: null, error: 'Outfitter profile not found' }
+
+  const businessName = strOrNull(formData.get('business_name')) ?? ''
+  const state = strOrNull(formData.get('state')) ?? ''
+  if (!businessName || !state) {
+    return { outfitter: null, error: 'Business name and state are required.' }
+  }
+
+  const yearsRaw = formData.get('years_in_business')
+  const patch = {
+    business_name: businessName,
+    state,
+    description: strOrNull(formData.get('description')),
+    phone: strOrNull(formData.get('phone')),
+    email: strOrNull(formData.get('email')),
+    website: strOrNull(formData.get('website')),
+    years_in_business: yearsRaw ? parseInt(String(yearsRaw), 10) || null : null,
+  }
+
+  const { data, error } = await supabase
+    .from('outfitters')
+    .update(patch)
+    .eq('id', existing.id)
+    .select()
+    .single()
+
+  if (error) return { outfitter: null, error: error.message }
   return { outfitter: data as OutfitterRecord, error: null }
 }
 

@@ -87,6 +87,13 @@ export const DIFFICULTY_LEVELS = [
   { value: 'hard', label: 'Hard' },
 ] as const
 
+// Optional "Deals & Specials" tag that surfaces a listing on the homepage.
+export const SPECIAL_DEAL_OPTIONS = [
+  { value: 'last_minute', label: 'Last-Minute Deal' },
+  { value: 'cancellation', label: 'Cancellation Opening' },
+  { value: 'show_special', label: 'Show Special' },
+] as const
+
 // 24 selectable options for Price Includes / Excludes (Individual Hunt Listing spec)
 export const PRICE_INCLUDES_OPTIONS = [
   { value: 'observer', label: 'Observer' },
