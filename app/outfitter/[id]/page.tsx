@@ -1,5 +1,6 @@
 import { getOutfitterBySlug, type OutfitterDetail } from '@/lib/listings'
 import { mockOutfitters, mockHunts } from '@/lib/mock-data'
+import { recordPageView } from '@/lib/analytics'
 import OutfitterDetailClient from './outfitter-detail-client'
 
 interface PageProps {
@@ -13,6 +14,7 @@ function mockToOutfitterDetail(slug: string): OutfitterDetail {
     id: mock.id,
     slug: mock.id,
     name: mock.name,
+    logoUrl: null,
     state: mock.state,
     yearsInBusiness: mock.yearsInBusiness ?? null,
     rating: mock.rating,
@@ -35,6 +37,10 @@ export default async function OutfitterProfilePage({ params }: PageProps) {
 
   const detail = await getOutfitterBySlug(id)
   const outfitter = detail ?? mockToOutfitterDetail(id)
+
+  if (detail) {
+    await recordPageView(detail.id)
+  }
 
   return <OutfitterDetailClient outfitter={outfitter} isExample={!detail} />
 }

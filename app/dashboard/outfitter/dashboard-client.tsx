@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   List, Inbox, MessageSquare, BarChart2, User, Plus,
-  Eye, TrendingUp, CheckCircle, Clock, X, Loader2, Mail
+  Eye, TrendingUp, CheckCircle, Clock, X, Loader2, Mail, ArrowLeftRight
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import type { OutfitterRecord, HuntListingRecord } from '@/app/actions/outfitter'
 import type { OutfitterInquiry } from '@/app/actions/outfitter-inquiries'
+import type { OutfitterAnalytics } from '@/lib/analytics'
 import { markInquiryRead, replyToInquiry } from '@/app/actions/outfitter-inquiries'
 
 const navItems = [
@@ -54,9 +55,10 @@ interface Props {
     activeListings: number
     totalInquiries: number
   }
+  analytics: OutfitterAnalytics
 }
 
-export default function OutfitterDashboardClient({ outfitter, listings, inquiries, stats }: Props) {
+export default function OutfitterDashboardClient({ outfitter, listings, inquiries, stats, analytics }: Props) {
   const router = useRouter()
   const [activeSection, setActiveSection] = useState('listings')
   const [openInquiryId, setOpenInquiryId] = useState<string | null>(null)
@@ -112,8 +114,8 @@ export default function OutfitterDashboardClient({ outfitter, listings, inquirie
   const statCards = [
     { label: 'Active Listings', value: String(stats.activeListings), icon: List, color: 'text-wht-forest' },
     { label: 'Total Inquiries', value: String(stats.totalInquiries), icon: Inbox, color: 'text-wht-blaze' },
-    { label: 'Profile Views', value: '—', icon: Eye, color: 'text-wht-stone' },
-    { label: 'Response Rate', value: '—', icon: TrendingUp, color: 'text-blue-600' },
+    { label: 'Profile Views', value: analytics.totalViews, icon: Eye, color: 'text-wht-stone' },
+    { label: 'Response Rate', value: analytics.responseRate, icon: TrendingUp, color: 'text-blue-600' },
   ]
 
   return (
@@ -124,12 +126,20 @@ export default function OutfitterDashboardClient({ outfitter, listings, inquirie
             <h1 className="text-2xl font-bold text-white">Outfitter Dashboard</h1>
             <p className="text-wht-bone text-sm mt-1">{outfitter.business_name}</p>
           </div>
-          <Link href="/dashboard/outfitter/listings/new">
-            <Button variant="copper" className="hidden sm:flex gap-2">
-              <Plus className="h-4 w-4" />
-              Add New Hunt
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard/hunter">
+              <Button variant="outline-bone" className="hidden sm:flex gap-2">
+                <ArrowLeftRight className="h-4 w-4" />
+                Hunter Dashboard
+              </Button>
+            </Link>
+            <Link href="/dashboard/outfitter/listings/new">
+              <Button variant="copper" className="hidden sm:flex gap-2">
+                <Plus className="h-4 w-4" />
+                Add New Hunt
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -380,7 +390,7 @@ export default function OutfitterDashboardClient({ outfitter, listings, inquirie
                         className="flex w-full rounded-md border border-[#d4cfc6] bg-white px-3 py-2 text-sm text-wht-ink placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-wht-forest resize-none"
                       />
                       <p className="text-xs text-wht-stone font-body mt-1">
-                        Replies are saved on the inquiry. Email delivery to the hunter isn&apos;t hooked up yet — reach out via the email address above until then.
+                        Your reply appears in the hunter&apos;s dashboard under My Inquiries. Email notifications aren&apos;t sent yet, so for time-sensitive replies also reach out via the email address above.
                       </p>
                     </div>
 
@@ -428,10 +438,10 @@ export default function OutfitterDashboardClient({ outfitter, listings, inquirie
                 <h2 className="text-lg font-bold text-wht-forest mb-4">Analytics</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
-                    { label: "This Month's Views", value: '—', change: '', positive: true },
-                    { label: 'Inquiry Conversion', value: '—', change: '', positive: true },
-                    { label: 'Avg Response Time', value: '—', change: '', positive: true },
-                    { label: 'Profile Completeness', value: '—', change: '', positive: true },
+                    { label: "This Month's Views", value: analytics.monthViews, change: '', positive: true },
+                    { label: 'Inquiry Conversion', value: analytics.conversion, change: '', positive: true },
+                    { label: 'Avg Response Time', value: analytics.avgResponse, change: '', positive: true },
+                    { label: 'Profile Completeness', value: analytics.completeness, change: '', positive: true },
                   ].map((metric, i) => (
                     <div key={i} className="bg-white rounded-xl border border-wht-bone-2 p-5">
                       <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{metric.label}</div>
@@ -451,9 +461,18 @@ export default function OutfitterDashboardClient({ outfitter, listings, inquirie
                   </Link>
                 </div>
                 <div className="flex items-center gap-4 mb-6 pb-6 border-b border-wht-bone-2">
-                  <div className="w-16 h-16 rounded-2xl bg-wht-forest flex items-center justify-center text-white text-2xl font-bold">
-                    {outfitter.business_name.charAt(0).toUpperCase()}
-                  </div>
+                  {outfitter.logo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={outfitter.logo_url}
+                      alt={`${outfitter.business_name} logo`}
+                      className="w-16 h-16 rounded-2xl object-cover border border-wht-bone-2"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-2xl bg-wht-forest flex items-center justify-center text-white text-2xl font-bold">
+                      {outfitter.business_name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div>
                     <div className="font-bold text-wht-forest">{outfitter.business_name}</div>
                     <div className="text-sm text-gray-500">

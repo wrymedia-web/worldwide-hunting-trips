@@ -358,6 +358,7 @@ export interface OutfitterDetail {
   id: string
   slug: string
   name: string
+  logoUrl: string | null
   state: string | null
   yearsInBusiness: number | null
   rating: number
@@ -389,7 +390,7 @@ export async function getOutfitterBySlug(slug: string): Promise<OutfitterDetail 
     const { data, error } = await supabase
       .from('outfitters')
       .select(
-        'id, business_name, slug, state, description, phone, email, website, years_in_business, rating, review_count, verified, licensed, bonded'
+        'id, business_name, slug, state, description, phone, email, website, years_in_business, rating, review_count, verified, licensed, bonded, logo_url'
       )
       .eq('slug', slug)
       .single()
@@ -431,6 +432,7 @@ export async function getOutfitterBySlug(slug: string): Promise<OutfitterDetail 
       id: data.id,
       slug: data.slug,
       name: data.business_name,
+      logoUrl: data.logo_url ?? null,
       state: data.state,
       yearsInBusiness: data.years_in_business,
       rating: data.rating ?? 0,

@@ -15,6 +15,7 @@ export interface OutfitterRecord {
   email: string | null
   website: string | null
   years_in_business: number | null
+  logo_url: string | null
   is_verified: boolean
   created_at: string
 }

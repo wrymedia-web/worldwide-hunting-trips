@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import Image from 'next/image'
@@ -14,6 +14,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+
+  // Surface errors handed off from auth link redirects (e.g. expired reset links).
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('error')
+    if (fromUrl) setError(fromUrl)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

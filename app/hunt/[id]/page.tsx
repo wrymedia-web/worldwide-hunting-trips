@@ -1,5 +1,6 @@
 import { getListingDetailView, HuntDetailView } from '@/lib/listings'
 import { isHuntSaved } from '@/app/actions/hunter'
+import { recordPageView } from '@/lib/analytics'
 import { mockHunts } from '@/lib/mock-data'
 import type { HuntCardProps } from '@/components/hunt-card'
 import HuntDetailClient from './hunt-detail-client'
@@ -68,6 +69,10 @@ export default async function HuntDetailPage({ params }: PageProps) {
 
   const view = await getListingDetailView(id)
   const hunt: HuntDetailView = view ?? mockToDetailView(id)
+
+  if (view?.outfitterId && view.huntId) {
+    await recordPageView(view.outfitterId, view.huntId)
+  }
 
   const initiallySaved = hunt.huntId ? await isHuntSaved(hunt.huntId) : false
 

@@ -30,9 +30,18 @@ export default function OutfitterDetailClient({ outfitter, isExample }: Props) {
         {/* Profile header */}
         <div className="relative -mt-12 mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
-            <div className="w-24 h-24 rounded-2xl bg-wht-forest border-4 border-white shadow-lg flex items-center justify-center text-white font-extrabold text-3xl flex-shrink-0">
-              {initial}
-            </div>
+            {outfitter.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={outfitter.logoUrl}
+                alt={`${outfitter.name} logo`}
+                className="w-24 h-24 rounded-2xl border-4 border-white shadow-lg object-cover bg-white flex-shrink-0"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-2xl bg-wht-forest border-4 border-white shadow-lg flex items-center justify-center text-white font-extrabold text-3xl flex-shrink-0">
+                {initial}
+              </div>
+            )}
             <div className="flex-1 pb-2">
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <h1 className="text-2xl font-extrabold text-wht-forest tracking-tight">

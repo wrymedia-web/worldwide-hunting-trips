@@ -138,7 +138,7 @@ export default async function HomePage() {
             </h1>
 
             <p className="text-lg sm:text-xl text-wht-fog max-w-2xl mx-auto mb-10 leading-relaxed font-body">
-              Connect directly with trusted hunting outfitters across the United States.
+              Connect directly with trusted hunting outfitters across the world.
               No booking fees. No middlemen. Just you and the hunt.
             </p>
 

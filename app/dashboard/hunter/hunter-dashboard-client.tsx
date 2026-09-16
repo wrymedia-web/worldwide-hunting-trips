@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Heart, MessageSquare, Trophy, User, Compass, Inbox, Loader2, CheckCircle } from 'lucide-react'
+import { Heart, MessageSquare, Trophy, User, Compass, Inbox, Loader2, CheckCircle, ArrowLeftRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { HuntCard, type HuntCardProps } from '@/components/hunt-card'
@@ -36,9 +36,10 @@ interface Props {
   profile: ProfileData | null
   saved: HuntCardProps[]
   inquiries: HunterInquiry[]
+  isOutfitter?: boolean
 }
 
-export default function HunterDashboardClient({ email, profile, saved, inquiries }: Props) {
+export default function HunterDashboardClient({ email, profile, saved, inquiries, isOutfitter }: Props) {
   const [activeSection, setActiveSection] = useState('saved')
   const [form, setForm] = useState({
     fullName: profile?.full_name ?? '',
@@ -71,9 +72,19 @@ export default function HunterDashboardClient({ email, profile, saved, inquiries
     <div className="min-h-screen bg-wht-paper">
       {/* Header */}
       <div className="bg-wht-forest py-8 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl font-bold text-white">Hunter Dashboard</h1>
-          <p className="text-wht-bone text-sm mt-1">Manage your saved hunts, inquiries, and profile</p>
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Hunter Dashboard</h1>
+            <p className="text-wht-bone text-sm mt-1">Manage your saved hunts, inquiries, and profile</p>
+          </div>
+          {isOutfitter && (
+            <Link href="/dashboard/outfitter">
+              <Button variant="copper" className="gap-2">
+                <ArrowLeftRight className="h-4 w-4" />
+                Outfitter Dashboard
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -149,6 +160,15 @@ export default function HunterDashboardClient({ email, profile, saved, inquiries
                         </span>
                       </div>
                       <p className="text-sm text-gray-700 leading-relaxed">{inq.message}</p>
+                      {inq.replyMessage && (
+                        <div className="mt-3 bg-wht-paper rounded-lg p-3 border-l-2 border-wht-blaze">
+                          <div className="text-[10px] font-mono uppercase tracking-wider text-wht-blaze mb-1">
+                            Reply from {inq.outfitterName}
+                            {inq.repliedAt ? ` · ${inq.repliedAt}` : ''}
+                          </div>
+                          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{inq.replyMessage}</p>
+                        </div>
+                      )}
                       {(inq.preferredDates || inq.partySize > 1) && (
                         <div className="flex gap-4 mt-3 text-xs text-gray-500">
                           {inq.preferredDates && <span>Preferred: {inq.preferredDates}</span>}

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getOutfitterByUser, getOutfitterListings } from '@/app/actions/outfitter'
 import { getOutfitterInquiries } from '@/app/actions/outfitter-inquiries'
+import { getOutfitterAnalytics } from '@/lib/analytics'
 import OutfitterDashboardClient from './dashboard-client'
 
 export default async function OutfitterDashboardPage() {
@@ -26,6 +27,7 @@ export default async function OutfitterDashboardPage() {
     getOutfitterInquiries(),
   ])
 
+  const analytics = await getOutfitterAnalytics(outfitter, inquiries)
   const activeListings = listings.filter((l) => l.is_active).length
 
   return (
@@ -37,6 +39,7 @@ export default async function OutfitterDashboardPage() {
         activeListings,
         totalInquiries: inquiries.length,
       }}
+      analytics={analytics}
     />
   )
 }

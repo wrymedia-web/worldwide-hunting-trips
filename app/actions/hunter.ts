@@ -20,6 +20,8 @@ export interface HunterInquiry {
   partySize: number
   status: string
   createdAt: string
+  replyMessage: string | null
+  repliedAt: string | null
 }
 
 /** Toggle a hunt in the signed-in hunter's favorites. Returns the new saved state. */
@@ -126,7 +128,7 @@ export async function getMyInquiries(): Promise<HunterInquiry[]> {
     const admin = createAdminClient()
     const { data, error } = await admin
       .from('inquiries')
-      .select('id, message, preferred_dates, party_size, status, created_at, hunt_listings(title, slug), outfitters(business_name)')
+      .select('id, message, preferred_dates, party_size, status, created_at, reply_message, replied_at, hunt_listings(title, slug), outfitters(business_name)')
       .eq('hunter_profile_id', auth.user.id)
       .order('created_at', { ascending: false })
 
@@ -144,6 +146,12 @@ export async function getMyInquiries(): Promise<HunterInquiry[]> {
         preferredDates: (r.preferred_dates as string) ?? null,
         partySize: (r.party_size as number) ?? 1,
         status: (r.status as string) ?? 'new',
+        replyMessage: (r.reply_message as string) ?? null,
+        repliedAt: r.replied_at
+          ? new Date(r.replied_at as string).toLocaleDateString('en-US', {
+              month: 'short', day: 'numeric', year: 'numeric',
+            })
+          : null,
         createdAt: r.created_at
           ? new Date(r.created_at as string).toLocaleDateString('en-US', {
               month: 'short', day: 'numeric', year: 'numeric',

@@ -9,13 +9,22 @@ export default async function HunterDashboard() {
   const [saved, inquiries] = await Promise.all([getSavedHunts(), getMyInquiries()])
 
   let profile = null
+  let isOutfitter = false
   if (auth.user) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('full_name, phone, state, created_at')
-      .eq('id', auth.user.id)
-      .single()
+    const [{ data }, { data: outfitterRow }] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('full_name, phone, state, created_at')
+        .eq('id', auth.user.id)
+        .single(),
+      supabase
+        .from('outfitters')
+        .select('id')
+        .eq('profile_id', auth.user.id)
+        .maybeSingle(),
+    ])
     profile = data
+    isOutfitter = !!outfitterRow
   }
 
   return (
@@ -24,6 +33,7 @@ export default async function HunterDashboard() {
       profile={profile}
       saved={saved}
       inquiries={inquiries}
+      isOutfitter={isOutfitter}
     />
   )
 }

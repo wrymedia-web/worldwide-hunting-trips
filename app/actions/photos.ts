@@ -277,6 +277,113 @@ export async function reorderHuntPhotos(
   return { error: null }
 }
 
+// ─── Outfitter logo ───────────────────────────────────────────────────────────
+
+const LOGO_BUCKET = 'outfitter-logos'
+
+async function requireOutfitter(): Promise<{ outfitterId: string; logoUrl: string | null; error: string | null }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+
+  if (authError || !user) return { outfitterId: '', logoUrl: null, error: 'Not authenticated' }
+
+  const outfitter = await getOutfitterByUser(user.id)
+  if (!outfitter) return { outfitterId: '', logoUrl: null, error: 'Outfitter profile not found' }
+
+  return { outfitterId: outfitter.id, logoUrl: outfitter.logo_url ?? null, error: null }
+}
+
+function logoPublicUrl(path: string): string {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+  return `${base}/storage/v1/object/public/${LOGO_BUCKET}/${path}`
+}
+
+function logoPathFromUrl(url: string): string | null {
+  const marker = `/storage/v1/object/public/${LOGO_BUCKET}/`
+  const idx = url.indexOf(marker)
+  if (idx === -1) return null
+  return url.slice(idx + marker.length)
+}
+
+/** Upload (or replace) the signed-in outfitter's business logo/photo. */
+export async function uploadOutfitterLogo(
+  formData: FormData
+): Promise<{ logoUrl: string | null; error: string | null }> {
+  const { outfitterId, logoUrl: oldUrl, error: authErr } = await requireOutfitter()
+  if (authErr) return { logoUrl: null, error: authErr }
+
+  const file = formData.get('file')
+  if (!(file instanceof File) || file.size === 0) {
+    return { logoUrl: null, error: 'No file received.' }
+  }
+  if (!ALLOWED_MIME.has(file.type)) {
+    return { logoUrl: null, error: `Unsupported file type: ${file.type}. Use JPG, PNG, or WebP.` }
+  }
+  if (file.size > MAX_BYTES) {
+    return { logoUrl: null, error: 'Image is over the 8 MB limit.' }
+  }
+
+  const admin = createAdminClient()
+
+  // The bucket is created lazily so this works before any storage migration runs.
+  await admin.storage.createBucket(LOGO_BUCKET, { public: true }).catch(() => {})
+
+  const ext = extFromMime(file.type)
+  const key = `${outfitterId}/logo-${randomKey()}.${ext}`
+  const buffer = Buffer.from(await file.arrayBuffer())
+
+  const { error: upErr } = await admin.storage.from(LOGO_BUCKET).upload(key, buffer, {
+    contentType: file.type,
+    upsert: false,
+  })
+  if (upErr) return { logoUrl: null, error: `Upload failed: ${upErr.message}` }
+
+  const url = logoPublicUrl(key)
+  const { error: rowErr } = await admin
+    .from('outfitters')
+    .update({ logo_url: url })
+    .eq('id', outfitterId)
+
+  if (rowErr) {
+    await admin.storage.from(LOGO_BUCKET).remove([key])
+    return { logoUrl: null, error: `Save failed: ${rowErr.message}` }
+  }
+
+  // Best-effort: clean up the previous logo file.
+  if (oldUrl) {
+    const oldPath = logoPathFromUrl(oldUrl)
+    if (oldPath) await admin.storage.from(LOGO_BUCKET).remove([oldPath])
+  }
+
+  revalidatePath('/dashboard/outfitter')
+  revalidatePath('/dashboard/outfitter/profile/edit')
+  return { logoUrl: url, error: null }
+}
+
+/** Remove the signed-in outfitter's logo. */
+export async function removeOutfitterLogo(): Promise<{ error: string | null }> {
+  const { outfitterId, logoUrl, error: authErr } = await requireOutfitter()
+  if (authErr) return { error: authErr }
+  if (!logoUrl) return { error: null }
+
+  const admin = createAdminClient()
+  const path = logoPathFromUrl(logoUrl)
+  if (path) await admin.storage.from(LOGO_BUCKET).remove([path])
+
+  const { error } = await admin
+    .from('outfitters')
+    .update({ logo_url: null })
+    .eq('id', outfitterId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/dashboard/outfitter')
+  revalidatePath('/dashboard/outfitter/profile/edit')
+  return { error: null }
+}
+
 // ─── getHuntPhotos (read helper used by edit page) ────────────────────────────
 
 export async function getHuntPhotos(listingId: string): Promise<HuntPhoto[]> {
